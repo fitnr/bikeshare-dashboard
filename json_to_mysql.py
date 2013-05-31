@@ -60,7 +60,7 @@ def json_to_mysql(f):
     stats = data['stationBeanList']
     timestamp = datetime.strptime(data['executionTime'], '%Y-%m-%d %H:%M:%S %p').strftime('%Y-%m-%d %H:%M:%S')
 
-    conn = MySQLdb.connect(host='localhost', user='root', passwd="mysqlpass", db="cbdash")
+    conn = MySQLdb.connect(host='localhost', user='root', passwd="mysqlpass", db="wp")
     cursor = conn.cursor()
 
     # get list of all station_ids
