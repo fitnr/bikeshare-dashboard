@@ -52,19 +52,20 @@ INSERT_ROW = """INSERT INTO station_status (station_id, availableDocks, totalDoc
 
 INSERT_STATION = '''INSERT INTO stations (id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark) VALUES ({id}, "{stationName}", {latitude}, {longitude}, "{stAddress1}", "{stAddress2}", '{city}', '{postalCode}', '{location}', {altitude}, '{landMark}')'''
 
+DATABASE = 'wp'
 
 def json_to_mysql(f):
     try:
         handle = open(f, 'rb')
         data = json.load(handle)
-    except Exception as e:
+    except Exception, e:
         print e, f
         return
 
     stats = data['stationBeanList']
     timestamp = datetime.strptime(data['executionTime'], '%Y-%m-%d %I:%M:%S %p').strftime('%Y-%m-%d %H:%M:%S')
 
-    conn = MySQLdb.connect(host='localhost', user='root', passwd="mysqlpass", db="wp")
+    conn = MySQLdb.connect(host='localhost', user='root', passwd="mysqlpass", db=DATABASE)
     cursor = conn.cursor()
 
     # Check for previous insertion!
@@ -85,8 +86,9 @@ def json_to_mysql(f):
     # print 'found stations:', len(station_ids)
 
     for row in stats:
+        if row['lastCommunicationTime'] is None:
+            row['lastCommunicationTime'] = 'NULL'
 
-        row['lastCommunicationTime'] = row['lastCommunicationTime'] if (row['lastCommunicationTime'] is not None) else 'NULL'
         row['stationName'] = row['stationName'].encode('ascii', 'ignore')
         row['stAddress1'] = row['stAddress1'].encode('ascii', 'ignore')
 
@@ -96,8 +98,11 @@ def json_to_mysql(f):
         except Exception, e:
             print INSERT_ROW.format(stamp=timestamp, **row)
 
+        if row['altitude'] in (None, ''):
+            row['altitude'] = 'NULL'
+
         if row['id'] not in station_ids:
-            row['altitude'] = row['altitude'] if (row['altitude'] not in (None, '')) else 'NULL'
+                
             try:
                 cursor.execute(INSERT_STATION.format(**row))
                 # print 'inserted station', row['id']
