@@ -1,3 +1,0 @@
-DYLD_LIBRARY_PATH=/usr/local/mysql/lib:$DYLD_LIBRARY_PATH
-
-0-59 * * * * STAMP=$(date +"\%Y-\%m-\%d-\%H\%M");curl -s http://citibikenyc.com/stations/json/ > /Users/DOT/Documents/data/stations-$STAMP.json; python /Users/DOT/stratcom/bikeshare_dash/json_to_mysql.py /Users/DOT/Documents/data/stations-$STAMP.json;
