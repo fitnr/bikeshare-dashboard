@@ -7,5 +7,9 @@ $USER = "";
 $PWORD = "";
 $DATABASE = "";
 
-
+// production machine
+//$USER = "";
+//$PWORD = "";
+//$DATABASE = "";
 ?>
+
