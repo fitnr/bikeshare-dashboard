@@ -82,7 +82,20 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
   try {
     $handle = fopen($f, 'r');
     $data = fread($handle, filesize($f));
+
+    // Organize the data
     $data = (array) json_decode($data);
+    $stats = $data['stationBeanList'];
+    if (!$stats or $stats == NULL) {
+      echo "problem with the data!" . "\n";
+      var_dump($data);
+    }
+
+    // Set the date
+    date_default_timezone_set("America/New_York");
+    $dateObj = new DateTime($data['executionTime']);
+    $timestamp = $dateObj->format('Y-m-d H:i:s');
+
   } catch (Exception $e) {
     echo $e->getMessage() ."\n";
     return;
@@ -95,13 +108,6 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
   } catch (PDOException $e) {
     echo $e->getMessage() ."\n";
   }
-
-  // Organize the data and date
-  $stats = $data['stationBeanList'];
-
-  date_default_timezone_set("America/New_York");
-  $dateObj = new DateTime($data['executionTime']);
-  $timestamp = $dateObj->format('Y-m-d H:i:s');
 
   try {
     // Check if this timestamp has been added already
@@ -166,16 +172,16 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
 
       $station_data = array_intersect_key($row, $insert_station_keys);
       try {
-        $insert_stn = $pdo->prepare($INSERT_ROW);
-        $insert_stn->execute($row);
+        $insert_stn = $pdo->prepare($INSERT_STATION);
+        $insert_stn->execute($station_data);
         // echo 'inserted station '. $row['id'];
       } catch (PDOException $e) {
         echo $e->getMessage() . "\n";
         echo 'problem inserting station '. $station_data['id'] ."\n";
         echo $insert_stn->queryString;
-        // echo $insert_stn->debugDumpParams();
-        echo 'station data ' . count($station_data) . "\n";
-        echo 'station ' .count($insert_station_keys) . "\n";
+        echo $insert_stn->debugDumpParams();
+        echo 'stn data ' . count($station_data) . "\n";
+        echo 'station  ' .count($insert_station_keys) . "\n";
         
       }
     endif;
