@@ -57,7 +57,7 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     $data = fread($handle, filesize($f));
     $data = (array) json_decode($data);
   } catch (Exception $e) {
-    echo $e->getMessage();
+    echo $e->getMessage() ."\n";
     return;
   }
 
@@ -66,7 +66,7 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     $pdo = new PDO("mysql:host=$host;dbname=$database", $user, $pword);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
   } catch (PDOException $e) {
-    echo $e->getMessage();
+    echo $e->getMessage() ."\n";
   }
 
   // Organize the data and date
@@ -84,11 +84,11 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     $result_count = $select_count->fetch();
     
   } catch (PDOException $e) {
-    echo $e->getMessage();  
+    echo $e->getMessage() ."\n";
   }
 
   if ($result_count['count'] > 0):
-    echo 'skipping '. $timestamp .' '. $f;
+    echo 'skipping '. $timestamp .' '. $f ."\n";
     return;
   endif;
 
@@ -98,7 +98,7 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     $select_stn->execute();
     $result_stations = $select_stn->fetch();
   } catch (PDOException $e) {
-    print $e->getMessage();
+    print $e->getMessage() ."\n";
   }
 
   $station_ids = array();
@@ -119,8 +119,8 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
       $insert_row = $pdo->prepare($INSERT_ROW, $row);
       $insert_row->execute();
     } catch (PDOException $e) {
-      print $insert_row->queryString;
-      print $e->getMessage();
+      echo $insert_row->queryString ."\n";
+      echo $e->getMessage() ."\n";
     }
     // echo sprintf("Auto Increment ID: %s", $pdo->lastInsertId);
 
@@ -134,8 +134,8 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
         $insert_stn->execute();
         // echo 'inserted station '. $row['id'];
       } catch (PDOException $e) {
-        echo 'problem inserting station '. $row['id'];
-        echo $e->getMessage();
+        echo 'problem inserting station '. $row['id'] ."\n";
+        echo $e->getMessage() . "\n";
       }
     endif;
 
@@ -145,5 +145,4 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
   $pdo = NULL;
 
 }
-
 ?>
