@@ -42,21 +42,25 @@ foreach($station_data as $stn)
   $station_status[$stn->status]++;
 
 ?>
-<h2>Activity overview for last <?php echo pluralize($since); ?></h2>
+
+<h1>Activity overview for last <?php echo pluralize($since); ?></h1>
 
 <form action="./" class="form-inline">
   Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
 </form>
-<h3>Available docks and bikes</h3>
-<div id="overview" class="d3-graph"></div>
 
-<hr>
+<div class="row">
 
-<h2>Stations</h2>
+  <div class="span3">
+    <h3>Available docks and bikes</h3>
+      <div id="overview" class="d3-graph"></div>
+  </div>
+  <div class="span3">
+    <h3>Full and empty stations</h3>
 
-<h3>Full and empty stations</h3>
-
-<div id="fullempty" class="d3-graph"></div>
+    <div id="fullempty" class="d3-graph"></div>
+  </div>
+</div>
 
 <p><a href="./system_activity_csv/<?php echo "?since=".$since ;?>">Download data (csv)</a></p>
 
@@ -98,9 +102,9 @@ foreach($station_data as $stn)
 
 <script>
     var since = <?php echo $kwargs['since'] ;?>;
-    var margin = {top: 20, right: 100, bottom: 30, left: 50},
-        width = 1000 - margin.left - margin.right,
-        height = 300 - margin.top - margin.bottom;
+    var margin = {top: 10, right: 30, bottom: 30, left: 42},
+        width = 640 - margin.left - margin.right,
+        height = 250 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
 
@@ -133,6 +137,9 @@ foreach($station_data as $stn)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+    margin.left = 30;
+    margin.right = 100;
+    
     var svg2 = d3.select("#fullempty").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -193,8 +200,8 @@ foreach($station_data as $stn)
         bike.append("text")
             .datum(function(d) { return {name: d.name.replace('_',  ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
-            .attr("x", 3)
-            .attr("dy", ".35em")
+            .attr("x", -70)
+            .attr("dy", "1.2em")
             .text(function(d) { return d.name; });
 
         // Full or Empty data
@@ -203,7 +210,7 @@ foreach($station_data as $stn)
         });
 
         y2.domain([
-            d3.min(fullEmptyData, function(c) { return d3.min(c.values, function(v) { return 0; }); }),
+            d3.min(fullEmptyData, function(c) { return d3.min(c.values, function(v) { return v.number; }); }),
             d3.max(fullEmptyData, function(c) { return d3.max(c.values, function(v) { return v.number; }); })
         ]);
 
@@ -235,8 +242,8 @@ foreach($station_data as $stn)
         bike2.append("text")
             .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
-            .attr("x", 3)
-            .attr("dy", ".35em")
+            .attr("x", 2)
+            .attr("dy", "0.35em")
             .text(function(d) { return d.name; });
       });
 </script>
