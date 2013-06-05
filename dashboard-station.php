@@ -22,7 +22,7 @@ get_header('dashboard');
 
 <form action="./" class="form-inline">
   <input type="hidden" name="station" value="<?php echo $station_id ?>">
-  <input type="text" placeholder="Show Me the Last x Hours" name="since" id="since">
+  Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
 </form>
 
 <div id="activity" class="d3-graph"></div>

@@ -42,7 +42,7 @@ foreach($station_data as $stn)
 <h2>Activity overview for last <?php echo pluralize($since); ?></h2>
 
 <form action="./" class="form-inline">
-  Show me the last <input type="text" class="input-mini" name="since" id="since"> Hours
+  Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
 </form>
 <h3>Available docks and bikes</h3>
 <div id="overview" class="d3-graph"></div>
