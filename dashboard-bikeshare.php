@@ -12,14 +12,17 @@ function status1($x) { return ($x->status == '1'); }
 function status2($x) { return ($x->status == '2'); }
 function status3($x) { return ($x->status == '3'); }
 
-function top_stations($data, $line) {
+function top_stations($data, $line='%s (%s, %s)') {
     $output = '';
     foreach ($data as $value):
         if ($value->diffDocks > 0):
             $format = $line;
         else:
             $format = '<span class="badge badge-important">' . $line . '</span>';
-        endif;          
+        endif;
+
+        $format = '<a href="%s/station-dashboard/?station=%s">'. $format .'</a>';
+
         $output .= '<li>' . sprintf($format, get_bloginfo('home'), $value->id, $value->stationName, $value->maxDocks, $value->minDocks) . '</li>';
 
     endforeach;
@@ -77,19 +80,19 @@ foreach($station_data as $stn)
 <h4 id="inactive">Not In Service</h4>
 
 <ul class="cols-three">
-    <?php echo top_stations(array_filter($station_data, 'status3'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
+    <?php echo top_stations(array_filter($station_data, 'status3')) ?>
 </ul>
 
 <h4 id="active">Active Stations</h4>
 
 <ul class="cols-three">
-    <?php echo top_stations(array_filter($station_data, 'status1'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
+    <?php echo top_stations(array_filter($station_data, 'status1')) ?>
 </ul>
 
 <h4 id="planned">Planned Stations</h4>
 
 <ul class="cols-three">
-    <?php echo top_stations(array_filter($station_data, 'status2'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
+    <?php echo top_stations(array_filter($station_data, 'status2')) ?>
 </ul>
 
 
