@@ -4,7 +4,10 @@
  * @subpackage bikeshare-dashboard
  */
 
+
+
 add_action('template_redirect', 'bikeshare_request');
+
 function bikeshare_request() {
   if (preg_match(',/system_activity/,', $_SERVER['REQUEST_URI'])) {
     header("HTTP/1.0 200 OK");
@@ -12,9 +15,31 @@ function bikeshare_request() {
     echo abstract_bikeshare_dashboard($args);
     exit;
     
+  } elseif (preg_match(',/system_activity_csv/,', $_SERVER['REQUEST_URI'])) {
+    $args = get_overview_data();
+    $args['output'] = 'csv';
+    $output = abstract_bikeshare_dashboard($args);
+    header("HTTP/1.0 200 OK");
+    header('Content-type: application/CSV');
+    header('Content-Disposition: attachment; filename="'. $output['filename'] .'.csv"');
+    header("Pragma: no-cache");
+    header("Expires: 0");
+    echo $output['csv'];
+    exit;
+
   } elseif (preg_match('-/station_activity/(\d{1,4})/-', $_SERVER['REQUEST_URI'], $matches)) {
     header("HTTP/1.0 200 OK");
     echo station_activity($matches[1]);
+    exit;
+
+  } elseif (preg_match('-/station_activity_csv/(\d{1,4})/-', $_SERVER['REQUEST_URI'], $matches)) {
+    $output = station_activity($matches[1], 'csv');
+    header("HTTP/1.0 200 OK");
+    header('Content-type: application/CSV');
+    header('Content-Disposition: attachment; filename="'. $output['filename'] .'.csv"');
+    header("Pragma: no-cache");
+    header("Expires: 0");
+    echo $output['csv'];
     exit;
   }
 }
@@ -38,7 +63,11 @@ function abstract_bikeshare_dashboard($kwargs) {
   global $wpdb;
 
   $data = $wpdb->get_results(sprintf($kwargs['q'], $kwargs['since'], $kwargs['filter']));
-  return json_encode($data);
+  if ($kwargs['output']=='csv'):
+    return output_csv($kwargs['fileName'], $data);
+  else:
+    return json_encode($data);
+  endif;
 }
 
 function get_station_name($id) { // Internal function, not in API
@@ -64,8 +93,8 @@ function get_overview_data($since=6) {
     $filter = "AND MINUTE(`stamp`) % 3 = 0"; // Get records from every third minute
   }
 
-  $q = "SELECT `stamp`, SUM(`totalDocks`) Total_Docks, SUM(`availableDocks`) Available_Docks, SUM(`availableBikes`) Available_Bikes, COUNT(IF(`availableDocks`=0, 1, NULL)) Full_Stations, COUNT(IF(`availableBikes`=0, 1, NULL)) Empty_Stations FROM station_status WHERE HOUR(timediff(`stamp`, now())) <= %d %s GROUP BY stamp ORDER BY `stamp` DESC;";
-  return array('q'=>$q, 'since'=>$since, 'filter'=>$filter);
+  $q = "SELECT `stamp` datetime, `totalDocks` Total_Docks, `availDocks` Available_Docks, `availBikes` Available_Bikes, `fullStations` Full_Stations, `emptyStations` Empty_Stations FROM status_report WHERE HOUR(timediff(`stamp`, now())) <= %d %s ORDER BY `stamp` ASC;";
+  return array('q'=>$q, 'since'=>$since, 'filter'=>$filter, 'fileName'=>'overview-' . date('Y-m-d'));
 }
 
 function station_overview($since=1) {
@@ -79,7 +108,7 @@ function station_overview($since=1) {
   return array('q'=>$q, 'since'=>$since);
 }
 
-function station_activity($station_id, $since=6) {
+function station_activity($station_id, $output='json', $since=6) {
   // since is in hours
   global $wpdb;
   global $wp_query;
@@ -97,11 +126,33 @@ function station_activity($station_id, $since=6) {
 
   $j = "SELECT `id`, `stationName` FROM stations y WHERE `id`=%d";
 
-  $q = "SELECT availableDocks Available_Docks, availableBikes Available_Bikes, stamp FROM station_status WHERE station_id=%d and HOUR(TIMEDIFF(NOW(), stamp)) <= %d %s ORDER BY stamp DESC;";
+  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes FROM station_status WHERE station_id=%d and HOUR(TIMEDIFF(NOW(), stamp)) <= %d %s ORDER BY stamp ASC;";
 
   $data = $wpdb->get_results(sprintf($q, $station_id, $since, $filter));
   $hed = $wpdb->get_results(sprintf($j, $station_id));
-  return json_encode(array("stationInfo"=>$hed[0], "activity"=>$data, 'query'=>sprintf($q, $station_id, $since, $filter)));
+
+  if ($output=='csv'):
+    return output_csv($hed[0]->stationName, $data);
+  else:
+    return json_encode(array("stationInfo"=>$hed[0], "activity"=>$data, 'query'=>sprintf($q, $station_id, $since, $filter)));
+  endif;
+}
+
+function output_csv($filename, $data) {
+  // For filename: strange characters to underscore, remove spaces
+  $filename = preg_replace(array('/[^a-z0-9_\-]/i', '/ /'), array('_', ''), $filename);
+  $fieldnames = array_keys(get_object_vars($data[1]));
+
+  $format = str_repeat('%s,', count($fieldnames));
+  $format = substr($format, 0, -1) . "\n"; // remove trailing comma
+
+  // Start the csv w/ header line
+  $csv = vsprintf($format, $fieldnames);
+
+  foreach($data as $row)
+    $csv .= vsprintf($format, (array) $row);
+
+  return array('filename'=>$filename, 'csv'=>$csv);
 }
 
 function pluralize($x, $singular='hour', $plural='hours') {

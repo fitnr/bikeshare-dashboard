@@ -52,7 +52,10 @@ foreach($station_data as $stn)
 <h2>Stations</h2>
 
 <h3>Full and empty stations</h3>
+
 <div id="fullempty" class="d3-graph"></div>
+
+<p><a href="./system_activity_csv/<?php echo "?since=".$since ;?>">Download data (csv)</a></p>
 
 <hr>
 
@@ -60,26 +63,30 @@ foreach($station_data as $stn)
 
 <h3>Station list</h3>
 
-<p>There are <?php echo $station_status['1']?> active stations.</p>
-<p>There are <?php echo $station_status['2']?> planned stations.</p>
-<p>There are <?php echo $station_status['3']?> stations not in service.</p>
+<p>In the last <?php echo pluralize($since); ?>:</p>
+<ul>
+  <li><?php echo $station_status['3']?> stations have been listed as <a href="#inactive">not in service</a>.</li>
+  <li><?php echo $station_status['2']?> stations have been listed as <a href="#planned">planned</a>.</li>
+  <li><?php echo $station_status['1']?> stations have been <a href="#active">active</a>.</li>
+  
+</ul>
 
 <p>The maximum and minimum number of available docks in the last <?php echo pluralize($since); ?> are shown in parentheses.</p>
 <p><span class="label label-important">Red</span> stations have no activity in the last <?php echo pluralize($since); ?>.</p>
 
-<h4>Not In Service</h4>
+<h4 id="inactive">Not In Service</h4>
 
 <ul class="cols-three">
     <?php echo top_stations(array_filter($station_data, 'status3'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
 </ul>
 
-<h4>Active Stations</h4>
+<h4 id="active">Active Stations</h4>
 
 <ul class="cols-three">
     <?php echo top_stations(array_filter($station_data, 'status1'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
 </ul>
 
-<h4>Planned Stations</h4>
+<h4 id="planned">Planned Stations</h4>
 
 <ul class="cols-three">
     <?php echo top_stations(array_filter($station_data, 'status2'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
@@ -132,10 +139,10 @@ foreach($station_data as $stn)
     d3.json("<?php bloginfo('home'); ?>/system_activity/?since=" + since, function(error, data){
 
       data.forEach(function(d) {
-          d.stamp = parseDate(d.stamp);
+          d.stamp = parseDate(d.datetime);
       });
 
-      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "stamp"; }));
+      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "datetime" && key !== "stamp"; }));
 
       var dataLines = color.domain().map(function(name) {
         return {
@@ -181,7 +188,7 @@ foreach($station_data as $stn)
             .style("stroke", function(d) { return color(d.name); });
 
         bike.append("text")
-            .datum(function(d) { return {name: d.name.replace('_',  ' '), value: d.values[0]}; })
+            .datum(function(d) { return {name: d.name.replace('_',  ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
             .attr("x", 3)
             .attr("dy", ".35em")
@@ -223,13 +230,11 @@ foreach($station_data as $stn)
             .style("stroke", function(d) { return color(d.name); });
 
         bike2.append("text")
-            .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[0]}; })
+            .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
             .attr("x", 3)
             .attr("dy", ".35em")
             .text(function(d) { return d.name; });
-
-
       });
 </script>
 

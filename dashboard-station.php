@@ -29,6 +29,8 @@ get_header('dashboard');
 
 <hr>
 
+<p><a href="../station_activity_csv/<?php echo $station_id . '/?since=' . $since ?>">Download data (csv)</a></p>
+
 <p><a href="../bikeshare-dashboard/">System Dashboard</a></p>
 
 <script>
@@ -71,10 +73,10 @@ get_header('dashboard');
     d3.json("../station_activity/" + station_id + '/?since=' + since, function(error, data){
       data = data['activity'];
       data.forEach(function(d) {
-          d.stamp = parseDate(d.stamp);
+          d.stamp = parseDate(d.datetime);
       });
 
-      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "stamp"; }));
+      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "stamp" && key !== "datetime"; }));
 
       var bikes = color.domain().map(function(name) {
           return {
@@ -119,7 +121,7 @@ get_header('dashboard');
             .style("stroke", function(d) { return color(d.name); });
 
         bike.append("text")
-            .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[0]}; })
+            .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.number) + ")"; })
             .attr("x", 3)
             .attr("dy", ".35em")
