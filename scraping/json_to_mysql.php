@@ -157,10 +157,10 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     } catch (PDOException $e) {
       echo $e->getMessage() ."\n";
       echo $insert_row->queryString;
-      echo $insert_row->debugDumpParams();
-      echo 'row data' . count($row_data) . "\n";
+      // echo $insert_row->debugDumpParams();
+      // echo 'row data' . count($row_data) . "\n";
       // var_dump($row_data);
-      echo 'insert_row_keys ' .count($insert_row_keys) . "\n";
+      // echo 'insert_row_keys ' .count($insert_row_keys) . "\n";
       // var_dump($insert_row_keys);
     }
     // echo sprintf("Auto Increment ID: %s", $pdo->lastInsertId);
@@ -179,9 +179,9 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
         echo $e->getMessage() . "\n";
         echo 'problem inserting station '. $station_data['id'] ."\n";
         echo $insert_stn->queryString;
-        echo $insert_stn->debugDumpParams();
-        echo 'stn data ' . count($station_data) . "\n";
-        echo 'station  ' .count($insert_station_keys) . "\n";
+        // echo $insert_stn->debugDumpParams();
+        // echo 'stn data ' . count($station_data) . "\n";
+        // echo 'station  ' .count($insert_station_keys) . "\n";
         
       }
     endif;
