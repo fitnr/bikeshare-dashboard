@@ -39,23 +39,26 @@ foreach($station_data as $stn)
   $station_status[$stn->status]++;
 
 ?>
-<h2>Activity Overview for last <?php echo pluralize($since); ?></h2>
+<h2>Activity overview for last <?php echo pluralize($since); ?></h2>
 
 <form action="./" class="form-inline">
   Show me the last <input type="text" class="input-mini" name="since" id="since"> Hours
 </form>
-
+<h3>Available docks and bikes</h3>
 <div id="overview" class="d3-graph"></div>
-
-<hr>
-
-<div id="fullempty" class="d3-graph"></div>
 
 <hr>
 
 <h2>Stations</h2>
 
+<h3>Full and empty stations</h3>
+<div id="fullempty" class="d3-graph"></div>
+
+<hr>
+
 <div id="gmap"></div>
+
+<h3>Station list</h3>
 
 <p>There are <?php echo $station_status['1']?> active stations.</p>
 <p>There are <?php echo $station_status['2']?> planned stations.</p>
@@ -64,19 +67,19 @@ foreach($station_data as $stn)
 <p>The maximum and minimum number of available docks in the last <?php echo pluralize($since); ?> are shown in parentheses.</p>
 <p><span class="label label-important">Red</span> stations have no activity in the last <?php echo pluralize($since); ?>.</p>
 
-<h3>Not In Service</h3>
+<h4>Not In Service</h4>
 
 <ul class="cols-three">
     <?php echo top_stations(array_filter($station_data, 'status3'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
 </ul>
 
-<h3>Active Stations</h3>
+<h4>Active Stations</h4>
 
 <ul class="cols-three">
     <?php echo top_stations(array_filter($station_data, 'status1'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
 </ul>
 
-<h3>Planned Stations</h3>
+<h4>Planned Stations</h4>
 
 <ul class="cols-three">
     <?php echo top_stations(array_filter($station_data, 'status2'), '<a href="%s/station-dashboard/?station=%s">%s (%s, %s)</a>') ?>
