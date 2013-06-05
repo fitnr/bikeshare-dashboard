@@ -39,7 +39,7 @@
 
     <link rel="profile" href="http://gmpg.org/xfn/11" />
     <script type="text/javascript" src="<?php echo get_bloginfo("template_url"); ?>/js/d3.v3.min.js"></script>
-    <link rel="stylesheet" media="screen" href="<?php echo get_bloginfo("template_url"); ?>/css/bootstrap.min.css"></link>
+    <link rel="stylesheet" media="screen" href="<?php echo get_bloginfo("template_url"); ?>/style.css"></link>
 
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>

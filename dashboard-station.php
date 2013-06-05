@@ -1,6 +1,8 @@
 <?php
-/*
-Template Name: Single Station Dashboard
+/**
+ * Template Name: Single Station Dashboard
+ * @package WordPress
+ * @subpackage bikeshare-dashboard
 */
 global $wp_query;
 
@@ -20,7 +22,7 @@ get_header('dashboard');
 
 <form action="./" class="form-inline">
   <input type="hidden" name="station" value="<?php echo $station_id ?>">
-  Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
+  <input type="text" placeholder="Show Me the Last x Hours" name="since" id="since">
 </form>
 
 <div id="activity" class="d3-graph"></div>
