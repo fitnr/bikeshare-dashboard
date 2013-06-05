@@ -50,6 +50,8 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
   /* constants */
   $INSERT_ROW = 'INSERT INTO station_status (station_id, availableDocks, totalDocks, statusValue, statusKey, availableBikes, lastCommunicationTime, stamp) VALUES (:id, :availableDocks, :totalDocks, :statusValue, :statusKey, :availableBikes, :lastCommunicationTime, :stamp)';
   $INSERT_STATION = 'INSERT INTO stations (id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark) VALUES (:id, :stationName, :latitude, :longitude, :stAddress1, :stAddress2, :city, :postalCode, :location, :altitude, :landMark)';
+  // 1 is the geoid for all of NYC
+  $INSERT_STATUS = "INSERT INTO status_report (stamp, geo_id, availBikes, availDocks, totalDocks, fullStations, emptyStations) SELECT stamp, 1 geoid, sum(availableBikes), sum(availableDocks), sum(totalDocks), COUNT(IF(availableDocks=0, 1, NULL)) fullStations, COUNT(IF(availableBikes=0, 1, NULL)) emptyStations FROM station_status WHERE stamp=:stamp";
 
   $insert_row_keys = array(
     "id" => NULL,
@@ -179,6 +181,15 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     endif;
 
   endforeach;
+
+  // create a new row in the status table
+  try {
+    $insert_status = $pdo->prepare($INSERT_STATUS);
+    $insert_status->execute(array('stamp'=>$timestamp));
+  } catch (PDOException $e) {
+    echo $e->getMessage() . "\n";
+    echo $insert_status->queryString;
+  }
 
   // Close the connection
   $pdo = NULL;
