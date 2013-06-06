@@ -77,6 +77,7 @@ function get_station_name($id) { // Internal function, not in API
    return $data[0]->stationName;
 }
 
+// Get overview information for the whole system
 function get_overview_data($since=6) {
   // $since is in hours
   global $wp_query;
@@ -93,10 +94,11 @@ function get_overview_data($since=6) {
     $filter = "AND MINUTE(`stamp`) % 3 = 0"; // Get records from every third minute
   }
 
-  $q = "SELECT `stamp` datetime, `totalDocks` Total_Docks, `availDocks` Available_Docks, `availBikes` Available_Bikes, `fullStations` Full_Stations, `emptyStations` Empty_Stations FROM status_report WHERE HOUR(timediff(`stamp`, now())) <= %d %s ORDER BY `stamp` ASC;";
+  $q = "SELECT s.stamp datetime, s.totalDocks Total_Docks, s.availDocks Available_Docks, s.availBikes Available_Bikes, s.fullStations Full_Stations, s.emptyStations Empty_Stations FROM status_report s WHERE (s.stamp > NOW() - INTERVAL %d HOUR) %s ORDER BY s.stamp ASC;";
   return array('q'=>$q, 'since'=>$since, 'filter'=>$filter, 'fileName'=>'overview-' . date('Y-m-d'));
 }
 
+// Get information about the status of each station in the system
 function station_overview($since=1) {
   // $since is in hours
   global $wp_query;
@@ -104,10 +106,11 @@ function station_overview($since=1) {
      $since = $wp_query->query_vars['since'];
   endif;
 
-  $q = "SELECT y.id id, stationName, MIN(availableDocks) minDocks, MAX(availableDocks) maxDocks, MAX(availableDocks)-MIN(availableDocks) diffDocks, MAX(x.statusKey) status FROM station_status x JOIN stations y ON x.station_id = y.id WHERE HOUR(timediff(stamp, now())) <= %d GROUP BY y.id";
+  $q = "SELECT y.id, y.stationName, MIN(x.availableDocks) minDocks, MAX(x.availableDocks) maxDocks, MAX(x.availableDocks)-MIN(x.availableDocks) diffDocks, MAX(x.statusKey) status FROM station_status x JOIN stations y ON x.station_id = y.id WHERE (x.stamp > NOW() - INTERVAL %d HOUR) GROUP BY y.id";
   return array('q'=>$q, 'since'=>$since);
 }
 
+// The status of a particular station over time.
 function station_activity($station_id, $output='json', $since=6) {
   // since is in hours
   global $wpdb;
@@ -126,7 +129,7 @@ function station_activity($station_id, $output='json', $since=6) {
 
   $j = "SELECT `id`, `stationName` FROM stations y WHERE `id`=%d";
 
-  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes FROM station_status WHERE station_id=%d and HOUR(TIMEDIFF(NOW(), stamp)) <= %d %s ORDER BY stamp ASC;";
+  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes FROM station_status WHERE station_id=%d and (stamp > NOW() - INTERVAL %d HOUR) %s ORDER BY stamp ASC;";
 
   $data = $wpdb->get_results(sprintf($q, $station_id, $since, $filter));
   $hed = $wpdb->get_results(sprintf($j, $station_id));
