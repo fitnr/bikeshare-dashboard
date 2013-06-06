@@ -13,7 +13,7 @@ if(isset($wp_query->query_vars['station'])) {
     $since = ($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 6;
 }
 
-get_header('dashboard');
+get_header();
 ?>
 
 <h2><?php echo (isset($post->stationName)) ? $post->stationName : "Couldn't find that station"; ?></h2>
@@ -38,7 +38,7 @@ get_header('dashboard');
         station_id = <?php echo $station_id; ?>;
 
     var margin = {top: 20, right: 80, bottom: 30, left: 50},
-        width = 1300 - margin.left - margin.right,
+        width = 1096 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
@@ -129,4 +129,4 @@ get_header('dashboard');
       });
 </script>
 
-<?php get_footer('dashboard'); ?>
+<?php get_footer(); ?>

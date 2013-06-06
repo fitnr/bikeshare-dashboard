@@ -4,7 +4,7 @@
  * @package WordPress
  * @subpackage bikeshare-dashboard
 */
-get_header('dashboard');
+get_header();
 
 function objcmp($a, $b) { return $a->diffDocks > $b->diffDocks; }
 
@@ -103,7 +103,7 @@ foreach($station_data as $stn)
 <script>
     var since = <?php echo $kwargs['since'] ;?>;
     var margin = {top: 10, right: 30, bottom: 30, left: 42},
-        width = 600 - margin.left - margin.right,
+        width = 540 - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
@@ -248,4 +248,4 @@ foreach($station_data as $stn)
       });
 </script>
 
-<?php get_footer('dashboard'); ?>
+<?php get_footer(); ?>

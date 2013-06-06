@@ -47,6 +47,7 @@
 
     <style>
         .cols-three {
+          margin-left: 0;
           columns:100px 3;
           -webkit-columns:100px 3; /* Safari and Chrome */
           -moz-columns:100px 3; /* Firefox */
