@@ -103,8 +103,8 @@ foreach($station_data as $stn)
 <script>
     var since = <?php echo $kwargs['since'] ;?>;
     var margin = {top: 10, right: 30, bottom: 30, left: 42},
-        width = 640 - margin.left - margin.right,
-        height = 250 - margin.top - margin.bottom;
+        width = 600 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
 

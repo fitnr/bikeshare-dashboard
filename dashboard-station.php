@@ -38,7 +38,7 @@ get_header('dashboard');
         station_id = <?php echo $station_id; ?>;
 
     var margin = {top: 20, right: 80, bottom: 30, left: 50},
-        width = 1000 - margin.left - margin.right,
+        width = 1300 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
     var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
