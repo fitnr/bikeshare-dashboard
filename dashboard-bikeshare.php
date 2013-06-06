@@ -66,7 +66,11 @@ foreach($station_data as $stn)
 
 <hr>
 
-<div id="gmap"></div>
+<div class="row">
+  <div id="map-ui" class="span6">
+    <div id="the-map" class="gmap"></div>
+  </div>
+</div>
 
 <h3>Station list</h3>
 
@@ -254,6 +258,26 @@ foreach($station_data as $stn)
             .attr("dy", "0.35em")
             .text(function(d) { return d.name; });
       });
+</script>
+<!-- Google Map's API -->
+<script src="http://maps.google.com/maps/api/js?v=3.5&amp;sensor=false"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/js/infobox.min.js"></script>
+<script src="<?php echo get_template_directory_uri(); ?>/js/station-map.js"></script>
+<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/map-dashboard.js"></script>
+<script type="text/javascript" id="globals">
+  var map, markers, infowindow, overlay, newPointMarker, permalinked, tickers,
+  params = {},
+  DIRECTORY_URI = '<?php echo get_template_directory_uri(); ?>',
+  ICON_BREAKPOINT = 13,
+  HOME_URL = '<?php echo home_url(); ?>',
+  BIKE_LAYER = true;
+  INTERACTIVE = false,
+  ENDPOINT = "<?php echo home_url(); ?>/get_station_locations",
+  infoWindowStyle = 'static';
+
+  // showLoading();
+  getPoints(ENDPOINT, INTERACTIVE);
+  bikemapinit(BIKE_LAYER);
 </script>
 
 <?php get_footer(); ?>

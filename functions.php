@@ -44,6 +44,10 @@ function dashboard_request() {
     header("Expires: 0");
     echo $output['csv'];
     exit;
+  } else if (preg_match(',/get_station_locations$,', $_SERVER['REQUEST_URI'])) {
+    header("HTTP/1.0 200 OK");
+    echo station_locations();
+    exit;
   }
 }
 
@@ -134,6 +138,12 @@ function station_activity($station_id, $output='json', $since=6) {
   else:
     return json_encode(array("stationInfo"=>$hed[0], "activity"=>$data, 'query'=>sprintf($q, $station_id, $since, $filter)));
   endif;
+}
+
+function station_locations(){
+  global $wpdb;
+  $data = $wpdb->get_results("SELECT x.id, x.stationName, x.latitude lat, x.longitude lon, y.availableDocks, y.availableBikes, y.totalDocks, IF(statusKey=1 AND availableDocks=0,1,0) fullFlag, IF(statusKey=1 AND availableBikes=0,1,0) emptyFlag, statusValue FROM stations x INNER JOIN station_status y ON (x.id=y.station_id) WHERE y.stamp = (SELECT MAX(stamp) FROM station_status);");
+  return json_encode($data);
 }
 
 function output_csv($filename, $data) {

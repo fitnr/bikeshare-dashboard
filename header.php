@@ -68,7 +68,6 @@
         .x.axis path {
           display: none;
         }
-
         .bike path {
           fill: none;
           stroke-width: 3px;
@@ -77,6 +76,10 @@
           fill: none;
           stroke: steelblue;
           stroke-width: 3px;
+        }
+        #the-map {
+          height: 600px;
+          width:100%;
         }
     </style>
 
