@@ -4,11 +4,14 @@
  * @subpackage bikeshare-dashboard
  */
 
+// don't allow archive pages
+add_filter( 'archive_template', 'noop' );
 
+function noop() {}
 
-add_action('template_redirect', 'bikeshare_request');
+add_action('template_redirect', 'dashboard_request');
 
-function bikeshare_request() {
+function dashboard_request() {
   if (preg_match(',/system_activity/,', $_SERVER['REQUEST_URI'])) {
     header("HTTP/1.0 200 OK");
     $args = get_overview_data();

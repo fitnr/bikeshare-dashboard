@@ -2,7 +2,8 @@
 Theme Name: Bikeshare Dashboard
 Author: Neil Freeman
 Author URI: http://fakeisthenewreal.org
-Description: Theme for bikeshare dashboard functions.
+Description: Theme for bikeshare dashboard functions. Child of bikeshare theme.
+Template: bikeshare
 Version: 1.0
 
  * Bootstrap v2.3.2

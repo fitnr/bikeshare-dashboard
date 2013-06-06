@@ -38,8 +38,8 @@
     <link rel="apple-touch-icon" href="<?php echo get_template_directory_uri(); ?>/images/apple-touch-icon.png"><!--60X60-->
 
     <link rel="profile" href="http://gmpg.org/xfn/11" />
-    <script type="text/javascript" src="<?php echo get_bloginfo("template_url"); ?>/js/d3.v3.min.js"></script>
-    <link rel="stylesheet" media="screen" href="<?php echo get_bloginfo("template_url"); ?>/style.css"></link>
+    <script type="text/javascript" src="<?php echo get_stylesheet_directory_uri(); ?>/js/d3.v3.min.js"></script>
+    <link rel="stylesheet" media="screen" href="<?php echo get_stylesheet_directory_uri(); ?>/style.css"></link>
 
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
