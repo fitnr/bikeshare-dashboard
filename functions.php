@@ -86,16 +86,8 @@ function get_overview_data($since=6) {
      $since = $wp_query->query_vars['since'];
   endif;
 
-  $filter = '';
-  if ($since>24) {
-    $filter = "AND MINUTE(`stamp`) % 2 = 0"; // Get records from only even minutes
-  }
-  if ($since>72) {
-    $filter = "AND MINUTE(`stamp`) % 3 = 0"; // Get records from every third minute
-  }
-
-  $q = "SELECT s.stamp datetime, s.totalDocks Total_Docks, s.availDocks Available_Docks, s.availBikes Available_Bikes, s.fullStations Full_Stations, s.emptyStations Empty_Stations FROM status_report s WHERE (s.stamp > NOW() - INTERVAL %d HOUR) %s ORDER BY s.stamp ASC;";
-  return array('q'=>$q, 'since'=>$since, 'filter'=>$filter, 'fileName'=>'overview-' . date('Y-m-d'));
+  $q = "SELECT s.stamp datetime, s.totalDocks Total_Docks, s.availDocks Available_Docks, s.availBikes Available_Bikes, s.fullStations Full_Stations, s.emptyStations Empty_Stations FROM status_report s WHERE (s.stamp > NOW() - INTERVAL %d HOUR) ORDER BY s.stamp ASC;";
+  return array('q'=>$q, 'since'=>$since, 'fileName'=>'overview-' . date('Y-m-d'));
 }
 
 // Get information about the status of each station in the system
@@ -106,7 +98,7 @@ function station_overview($since=1) {
      $since = $wp_query->query_vars['since'];
   endif;
 
-  $q = "SELECT y.id, y.stationName, MIN(x.availableDocks) minDocks, MAX(x.availableDocks) maxDocks, MAX(x.availableDocks)-MIN(x.availableDocks) diffDocks, MAX(x.statusKey) status FROM station_status x JOIN stations y ON x.station_id = y.id WHERE (x.stamp > NOW() - INTERVAL %d HOUR) GROUP BY y.id";
+  $q = "SELECT MIN(x.availableDocks) minDocks, MAX(x.availableDocks) maxDocks, MAX(x.availableDocks)-MIN(x.availableDocks) diffDocks, MAX(x.statusKey) status, x.station_id, y.stationName FROM station_status x JOIN stations y ON x.station_id = y.id WHERE (x.stamp > NOW() - INTERVAL %d HOUR) GROUP BY x.station_id";
   return array('q'=>$q, 'since'=>$since);
 }
 
