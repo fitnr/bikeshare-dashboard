@@ -87,7 +87,7 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
 
   try {
     $data = open_file($f);
-    list($stats, $timestamp) = $parse_data($data);
+    list($stats, $timestamp) = parse_data($data);
   } catch (Exception $e) {
     echo $e->getMessage() ."\n";
     return;
@@ -125,7 +125,7 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
   endforeach;
 
   // create a new row in the status table
-  update_status_table($row['timestamp'], $pdo);
+  update_status_table($timestamp, $pdo);
 
   // Close the connection
   $pdo = NULL;
