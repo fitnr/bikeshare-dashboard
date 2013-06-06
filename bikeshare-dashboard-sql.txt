@@ -1,0 +1,131 @@
+-- MySQL dump 10.11
+--
+-- Host: localhost    Database: tfp
+-- ------------------------------------------------------
+-- Server version	5.0.95
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `bikeshare_points`
+--
+
+DROP TABLE IF EXISTS `bikeshare_points`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `bikeshare_points` (
+  `id` bigint(20) unsigned NOT NULL auto_increment,
+  `lat` double default NULL,
+  `lon` double default NULL,
+  `neighborhood` varchar(60) default NULL,
+  `user_name` varchar(100) default NULL,
+  `user_avatar_url` varchar(200) default NULL,
+  `user_profile_url` varchar(200) default NULL,
+  `user_zip` varchar(10) default NULL,
+  `user_email` varchar(100) default NULL,
+  `reason` tinytext,
+  `work_here` binary(1) NOT NULL default '0',
+  `posted_date` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `hide` binary(1) NOT NULL default '0',
+  `phase` smallint(6) default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=28495 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `neighborhood_map`
+--
+
+DROP TABLE IF EXISTS `neighborhood_map`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `neighborhood_map` (
+  `flickr_neighborhood` varchar(60) default NULL,
+  `neighborhood` varchar(60) default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `station_status`
+--
+
+DROP TABLE IF EXISTS `station_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `station_status` (
+  `id` bigint(20) unsigned NOT NULL auto_increment,
+  `station_id` int(11) NOT NULL,
+  `availableDocks` smallint(5) unsigned default NULL,
+  `totalDocks` smallint(5) unsigned default NULL,
+  `statusValue` varchar(128) default NULL,
+  `statusKey` tinyint(1) default NULL,
+  `availableBikes` smallint(5) unsigned default NULL,
+  `lastCommunicationTime` datetime default NULL,
+  `stamp` datetime default NULL,
+  PRIMARY KEY  (`id`),
+  KEY `stnid` (`station_id`),
+  KEY `stmp` (`stamp`)
+) ENGINE=InnoDB AUTO_INCREMENT=2965358 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `stations`
+--
+
+DROP TABLE IF EXISTS `stations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stations` (
+  `id` int(10) unsigned NOT NULL,
+  `stationName` varchar(128) default NULL,
+  `latitude` double(10,8) default NULL,
+  `longitude` double(10,8) default NULL,
+  `stAddress1` varchar(256) default NULL,
+  `stAddress2` varchar(256) default NULL,
+  `city` varchar(128) default NULL,
+  `postalCode` varchar(128) default NULL,
+  `location` varchar(128) default NULL,
+  `altitude` int(11) default NULL,
+  `landMark` varchar(128) default NULL,
+  `communityboard` smallint(3) unsigned default NULL,
+  KEY `stn_id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `status_report`
+--
+
+DROP TABLE IF EXISTS `status_report`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `status_report` (
+  `stamp` datetime NOT NULL,
+  `geo_id` int(10) unsigned default NULL,
+  `availDocks` int(10) unsigned default NULL,
+  `availBikes` int(10) unsigned default NULL,
+  `totalDocks` int(10) unsigned default NULL,
+  `fullStations` int(10) unsigned default NULL,
+  `emptyStations` int(10) unsigned default NULL,
+  KEY `stampidx` (`stamp`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2013-06-06 16:26:47
