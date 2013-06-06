@@ -45,15 +45,17 @@
     `communityboard` smallint(3) unsigned DEFAULT NULL,
 */
 
-function json_to_mysql($f, $host, $user, $pword, $database) {
-
-  /* constants */
-  $INSERT_ROW = 'INSERT INTO station_status (station_id, availableDocks, totalDocks, statusValue, statusKey, availableBikes, lastCommunicationTime, stamp) VALUES (:id, :availableDocks, :totalDocks, :statusValue, :statusKey, :availableBikes, :lastCommunicationTime, :stamp)';
-  $INSERT_STATION = 'INSERT INTO stations (id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark) VALUES (:id, :stationName, :latitude, :longitude, :stAddress1, :stAddress2, :city, :postalCode, :location, :altitude, :landMark)';
+/* constants*/
+$queries = array(
+  "INSERT_ROW" => 'INSERT INTO station_status (station_id, availableDocks, totalDocks, statusValue, statusKey, availableBikes, lastCommunicationTime, stamp) VALUES (:id, :availableDocks, :totalDocks, :statusValue, :statusKey, :availableBikes, :lastCommunicationTime, :stamp)',
+  "INSERT_STATION" => 'INSERT INTO stations (id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark) VALUES (:id, :stationName, :latitude, :longitude, :stAddress1, :stAddress2, :city, :postalCode, :location, :altitude, :landMark)',
   // 1 is the geoid for all of NYC
-  $INSERT_STATUS = "INSERT INTO status_report (stamp, geo_id, availBikes, availDocks, totalDocks, fullStations, emptyStations) SELECT stamp, 1 geoid, sum(availableBikes), sum(availableDocks), sum(totalDocks), COUNT(IF(availableDocks=0, 1, NULL)) fullStations, COUNT(IF(availableBikes=0, 1, NULL)) emptyStations FROM station_status WHERE stamp=:stamp";
+  "INSERT_STATUS" => "INSERT INTO status_report (stamp, geo_id, availBikes, availDocks, totalDocks, fullStations, emptyStations) SELECT stamp, 1 geoid, sum(availableBikes), sum(availableDocks), sum(totalDocks), COUNT(IF(availableDocks=0, 1, NULL)) fullStations, COUNT(IF(availableBikes=0, 1, NULL)) emptyStations FROM station_status WHERE stamp=:stamp"
+  );
 
-  $insert_row_keys = array(
+$param_keys = array(
+
+  'insert_row_keys' => array(
     "id" => NULL,
     "availableDocks" => NULL,
     "totalDocks" => NULL,
@@ -62,9 +64,9 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     "availableBikes" => NULL,
     "lastCommunicationTime" => NULL,
     "stamp" => NULL
-  );
+  ),
 
-  $insert_station_keys = array(
+  'insert_station_keys' => array(
     "id" => NULL,
     "stationName" => NULL,
     "latitude" => NULL,
@@ -76,26 +78,16 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     "location" => NULL,
     "altitude" => NULL,
     "landMark" => NULL
+  )
   );
 
-  /// Open the JSON.
+function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_York") {
+
+  date_default_timezone_set($tz);
+
   try {
-    $handle = fopen($f, 'r');
-    $data = fread($handle, filesize($f));
-
-    // Organize the data
-    $data = (array) json_decode($data);
-    $stats = $data['stationBeanList'];
-    if (!$stats or $stats == NULL) {
-      echo "problem with the data!" . "\n";
-      var_dump($data);
-    }
-
-    // Set the date
-    date_default_timezone_set("America/New_York");
-    $dateObj = new DateTime($data['executionTime']);
-    $timestamp = $dateObj->format('Y-m-d H:i:s');
-
+    $data = open_file($f);
+    list($stats, $timestamp) = $parse_data($data);
   } catch (Exception $e) {
     echo $e->getMessage() ."\n";
     return;
@@ -109,23 +101,75 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
     echo $e->getMessage() ."\n";
   }
 
-  try {
-    // Check if this timestamp has been added already
-    $select_count = $pdo->prepare("SELECT COUNT(id) count FROM station_status WHERE stamp='". $timestamp . "';");
-    $select_count->execute();
-    $select_count->setFetchMode(PDO::FETCH_ASSOC);
-    $result_count = $select_count->fetch();
-
-  } catch (PDOException $e) {
-    echo $e->getMessage() ."\n";
-  }
-
-  if ($result_count['count'] > 0):
-    echo 'skipping '. $timestamp .' '. $f ."\n";
+  // Check if this timestamp has been added already
+  $result_count = count_timestamp($timestamp, $pdo);
+  if ($result_count > 0):
+    echo 'Skipping '. $timestamp .', seen it before. Found in '. $f ."\n";
     return;
   endif;
 
   // Get list of current station IDs, for inserting (or not) stations
+  $station_ids = get_station_ids($pdo);
+  // echo 'found stations: '. count($station_ids);
+
+  // Loop through JSON, formatting data a bit and inserting.
+  foreach ($stats as $row):
+    $row = (array) $row;
+    $row['stamp'] = $timestamp;
+    insert_row($row, $pdo);
+
+    // Check if that station is in the stations table
+    if (!in_array($row['id'], $station_ids))
+      insert_station($row, $pdo);
+
+  endforeach;
+
+  // create a new row in the status table
+  update_status_table($row['timestamp'], $pdo);
+
+  // Close the connection
+  $pdo = NULL;
+}
+
+function open_file($f) {
+  $fs = filesize($f);
+
+  if ($fs == 0)
+    throw new Exception("File empty or missing: " . $f, 1);
+
+  $data = fread(fopen($f, 'r'), $fs);
+  return (array) json_decode($data);
+}
+
+function parse_data($data) {
+  // Organize the data, set the date
+  if (isset($data['stationBeanList']) && isset($data['executionTime'])):
+    $stats = $data['stationBeanList'];
+    $d = new DateTime($data['executionTime']);
+    $timestamp = $d->format('Y-m-d H:i:s');
+  else:
+    throw new Exception("Missing or badly formatted data in " . $f, 1);
+  endif;
+
+  return array($stats, $timestamp);
+}
+
+function count_timestamp($timestamp, $pdo) {
+  try {
+    $select_count = $pdo->prepare("SELECT COUNT(*) count FROM station_status WHERE stamp=:stamp;");
+    $select_count->execute(array('stamp'=>$timestamp));
+    $select_count->setFetchMode(PDO::FETCH_ASSOC);
+    $rc = $select_count->fetch();
+    return $rc['count'];
+
+  } catch (PDOException $e) {
+    echo $e->getMessage() ."\n";
+  }
+}
+
+function get_station_ids($pdo) {
+  $station_ids = array();
+
   try {
     $select_stn = $pdo->prepare("SELECT id FROM stations");
     $select_stn->execute();
@@ -134,71 +178,64 @@ function json_to_mysql($f, $host, $user, $pword, $database) {
   } catch (PDOException $e) {
     print $e->getMessage() ."\n";
   }
-
-  $station_ids = array();
-  foreach ($result_stations as $stn):
+  foreach ($result_stations as $stn)
     $station_ids[] = $stn['id'];
-  endforeach;
-  // echo 'found stations: '. count($station_ids);
 
-  // Loop through JSON, formatting data a bit and inserting.
-  foreach ($stats as $row):
-    $row = (array) $row;
-    $row['lastCommunicationTime'] = ($row['lastCommunicationTime'] === '') ? 'NULL' : $row['lastCommunicationTime'];
-    $row['stamp'] = $timestamp;
-    // $row['stationName'] = row['stationName'].encode('ascii', 'ignore')
-    // $row['stAddress1'] = row['stAddress1'].encode('ascii', 'ignore')
+  return $station_ids;
+}
 
-    $row_data = array_intersect_key($row, $insert_row_keys);
+function insert_row($row, $pdo) {
+  global $queries, $param_keys;
 
-    try {
-      $insert_row = $pdo->prepare($INSERT_ROW);
-      $insert_row->execute($row_data);
-    } catch (PDOException $e) {
-      echo $e->getMessage() ."\n";
-      echo $insert_row->queryString;
-      // echo $insert_row->debugDumpParams();
-      // echo 'row data' . count($row_data) . "\n";
-      // var_dump($row_data);
-      // echo 'insert_row_keys ' .count($insert_row_keys) . "\n";
-      // var_dump($insert_row_keys);
-    }
-    // echo sprintf("Auto Increment ID: %s", $pdo->lastInsertId);
+  // fiddle with the data
+  $row['lastCommunicationTime'] = ($row['lastCommunicationTime'] === '') ? 'NULL' : $row['lastCommunicationTime'];
 
-    // Check if that station is in the stations table
-    if (!in_array($row['id'], $station_ids)):
-      // If not, fiddle with the data
-      $row['altitude'] = ($row['altitude'] === '' || $row['altitude'] === NULL) ? '' : $row['altitude'];
+  $row_data = array_intersect_key($row, $param_keys['insert_row_keys']);
 
-      $station_data = array_intersect_key($row, $insert_station_keys);
-      try {
-        $insert_stn = $pdo->prepare($INSERT_STATION);
-        $insert_stn->execute($station_data);
-        // echo 'inserted station '. $row['id'];
-      } catch (PDOException $e) {
-        echo $e->getMessage() . "\n";
-        echo 'problem inserting station '. $station_data['id'] ."\n";
-        echo $insert_stn->queryString;
-        // echo $insert_stn->debugDumpParams();
-        // echo 'stn data ' . count($station_data) . "\n";
-        // echo 'station  ' .count($insert_station_keys) . "\n";
-        
-      }
-    endif;
-
-  endforeach;
-
-  // create a new row in the status table
   try {
-    $insert_status = $pdo->prepare($INSERT_STATUS);
+    $insert_row = $pdo->prepare($queries['INSERT_ROW']);
+    $insert_row->execute($row_data);
+  } catch (PDOException $e) {
+    echo $e->getMessage() ."\n";
+    echo $insert_row->queryString;
+    // echo $insert_row->debugDumpParams();
+    // echo 'row data' . count($row_data) . "\n";
+    // var_dump($row_data);
+    // echo 'insert_row_keys ' .count($insert_row_keys) . "\n";
+    // var_dump($insert_row_keys);
+  }
+  // echo sprintf("Auto Increment ID: %s", $pdo->lastInsertId);
+}
+
+function insert_station($row, $pdo) {
+  // Fiddle with the data
+  $row['altitude'] = ($row['altitude'] === '' || $row['altitude'] === NULL) ? '' : $row['altitude'];
+
+  $station_data = array_intersect_key($row, $param_keys['insert_station_keys']);
+  try {
+    $insert_stn = $pdo->prepare($queries['INSERT_STATION']);
+    $insert_stn->execute($station_data);
+    // echo 'inserted station '. $row['id'];
+  } catch (PDOException $e) {
+    echo $e->getMessage() . "\n";
+    echo 'problem inserting station '. $station_data['id'] ."\n";
+    echo $insert_stn->queryString;
+    // echo $insert_stn->debugDumpParams();
+    // echo 'stn data ' . count($station_data) . "\n";
+    // echo 'station  ' .count($insert_station_keys) . "\n";
+    
+  }
+}
+
+function update_status_table($timestamp, $pdo) {
+  global $queries, $param_keys;
+
+  try {
+    $insert_status = $pdo->prepare($queries['INSERT_STATUS']);
     $insert_status->execute(array('stamp'=>$timestamp));
   } catch (PDOException $e) {
     echo $e->getMessage() . "\n";
     echo $insert_status->queryString;
   }
-
-  // Close the connection
-  $pdo = NULL;
-
 }
 ?>
