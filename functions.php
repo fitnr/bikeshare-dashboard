@@ -98,7 +98,7 @@ function station_overview($since=1) {
      $since = $wp_query->query_vars['since'];
   endif;
 
-  $q = "SELECT MIN(x.availableDocks) minDocks, MAX(x.availableDocks) maxDocks, MAX(x.availableDocks)-MIN(x.availableDocks) diffDocks, MAX(x.statusKey) status, x.station_id, y.stationName FROM station_status x JOIN stations y ON x.station_id = y.id WHERE (x.stamp > NOW() - INTERVAL %d HOUR) GROUP BY x.station_id";
+  $q = "SELECT MIN(x.availableDocks) minDocks, MAX(x.availableDocks) maxDocks, MAX(x.availableDocks)-MIN(x.availableDocks) diffDocks, MAX(x.statusKey) status, x.station_id id, y.stationName FROM station_status x JOIN stations y ON x.station_id = y.id WHERE (x.stamp > NOW() - INTERVAL %d HOUR) GROUP BY x.station_id";
   return array('q'=>$q, 'since'=>$since);
 }
 
