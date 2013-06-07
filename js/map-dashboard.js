@@ -9,33 +9,40 @@ BikeshareOverlay.prototype.draw = function() {
 };
 
 function getPoints (map, url) {
-  markers = [];
   d3.json(url, function(error, data) {
     data.forEach(function(d){
       marker = createMarker(map, d);
-      //markers.push(marker);
     });
   });
 }
 
-function markerSize(breakpoint) {
-  return (map.getZoom() > breakpoint ? 'large' : 'small');
-}
+function markerSize(breakpoint) { return (map.getZoom() > breakpoint ? 'large' : 'small'); }
 
-function createMarker (map, station) {
-  // var size = markerSize(ICON_BREAKPOINT),
-  //   thisMarkerImg = markerDetails.getMarkerImage(station.phase, size),
-  //   thisShape = markerDetails.getShape(station.phase, size);
+var color = d3.scale.ordinal()
+    .domain([0, 1])
+    .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]);
 
+function createMarker (map, d) {
+
+  var strokeColor = color(d.availableBikes / d.availableDocks),
+    strokeWeight = 0.88;
+
+  if (d.fullFlag == 1) {
+    strokeColor = "#FF0000";
+    strokeWeight = 1;
+  } else if (d.emptyFlag == 1) {
+    strokeColor = "#00FF00";
+    strokeWeight = 1;
+  }
   var opts = {
-    strokeColor: "#FF0000",
-    strokeOpacity: 0.45,
-    strokeWeight: 0,
-    fillColor: "#FF0000",
-    fillOpacity: 0.25,
+    strokeColor: strokeColor,
+    strokeOpacity: 1,
+    strokeWeight: strokeWeight,
+    fillColor: color(d.availableBikes / d.availableDocks),
+    fillOpacity: 0.69,
     map: map,
-    center: new google.maps.LatLng(station.lat, station.lon),
-    radius: station.availableDocks * 7
+    center: new google.maps.LatLng(d.lat, d.lon),
+    radius: d.availableDocks * 7
   };
   return new google.maps.Circle(opts);
 }
@@ -54,13 +61,11 @@ function infoWindowD (m) {
   infowindow.open(map, m);
 }
 function bikemapinit(endpoint) {
-  var myLatlng = new google.maps.LatLng(40.7259, -73.99),
+  var myLatlng = new google.maps.LatLng(40.729, -73.99),
     options = {
       zoom: 13,
-      // zoomControlOptions: {
-      //   style: google.maps.ZoomControlStyle.LARGE
-      // },
       disableDefaultUI: true,
+      keyboardShortcuts: true,
       streetViewControl: false,
       panControl: false,
       center: myLatlng,

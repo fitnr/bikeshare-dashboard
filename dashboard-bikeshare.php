@@ -65,12 +65,8 @@ foreach($station_data as $stn)
 <p><a href="./system_activity_csv/<?php echo "?since=".$since ;?>">Download data (csv)</a></p>
 
 <hr>
-
-<div class="row">
-  <div id="map-ui" class="span6">
-    <div id="the-map" class="gmap"></div>
-  </div>
-</div>
+  <p><a href="./map/">View map</a></p>
+<hr>
 
 <h3>Station list</h3>
 
@@ -262,13 +258,9 @@ foreach($station_data as $stn)
 <!-- Google Map's API -->
 <script src="http://maps.google.com/maps/api/js?v=3.5&amp;sensor=false"></script>
 <script src="<?php echo get_template_directory_uri(); ?>/js/infobox.min.js"></script>
-<script src="<?php echo get_template_directory_uri(); ?>/js/station-map.js"></script>
 <script src="<?php echo get_stylesheet_directory_uri(); ?>/js/map-dashboard.js"></script>
 <script type="text/javascript" id="globals">
-  var ICON_BREAKPOINT = 13,
-  HOME_URL = '<?php echo home_url(); ?>',
-  ENDPOINT = "<?php echo home_url(); ?>/get_station_locations";
-  bikemapinit(ENDPOINT);
+  bikemapinit("<?php echo home_url(); ?>/get_station_locations");
 </script>
 
 <?php get_footer(); ?>

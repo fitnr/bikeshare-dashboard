@@ -77,10 +77,6 @@
           stroke: steelblue;
           stroke-width: 3px;
         }
-        #the-map {
-          height: 600px;
-          width:100%;
-        }
     </style>
 
   <?php wp_head(); ?>
