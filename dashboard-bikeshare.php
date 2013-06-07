@@ -163,7 +163,20 @@ foreach($station_data as $stn)
 
       // Overview Data
       overviewData = dataLines.filter(function(e){
-        return (e.name != 'Empty_Stations' && e.name != 'Full_Stations');
+        return (e.name != 'Empty_Stations' &&
+          e.name != 'Full_Stations' &&
+          e.name != 'Planned_Stations' &&
+          e.name != 'Inactive_Stations'
+        );
+      });
+
+      // Full or Empty data
+      fullEmptyData = dataLines.filter(function(e){
+        return (e.name == 'Empty_Stations' ||
+          e.name == 'Full_Stations' ||
+          e.name == 'Planned_Stations' ||
+          e.name == 'Inactive_Stations'
+        );
       });
 
       x.domain(d3.extent(data, function(d) { return d.stamp; }));
@@ -204,10 +217,7 @@ foreach($station_data as $stn)
             .attr("dy", "1.2em")
             .text(function(d) { return d.name; });
 
-        // Full or Empty data
-        fullEmptyData = dataLines.filter(function(e){
-          return (e.name == 'Empty_Stations' || e.name == 'Full_Stations');
-        });
+        // Full or Empty graph
 
         y2.domain([
             d3.min(fullEmptyData, function(c) { return d3.min(c.values, function(v) { return v.number; }); }),

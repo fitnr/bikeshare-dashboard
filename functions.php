@@ -89,7 +89,7 @@ function get_overview_data($since=6) {
      $since = $wp_query->query_vars['since'];
   endif;
 
-  $q = "SELECT s.stamp datetime, s.totalDocks Total_Docks, s.availDocks Available_Docks, s.availBikes Available_Bikes, s.fullStations Full_Stations, s.emptyStations Empty_Stations FROM status_report s WHERE (s.stamp > NOW() - INTERVAL %d HOUR) ORDER BY s.stamp ASC;";
+  $q = "SELECT s.stamp datetime, s.totalDocks Total_Docks, s.availDocks Available_Docks, s.availBikes Available_Bikes, s.nullDocks Null_Docks, s.fullStations Full_Stations, s.plannedStations Planned_Stations, s.emptyStations Empty_Stations, s.inactiveStations Inactive_Stations FROM status_report s WHERE (s.stamp > NOW() - INTERVAL %d HOUR) ORDER BY s.stamp ASC;";
   return array('q'=>$q, 'since'=>$since, 'fileName'=>'overview-' . date('Y-m-d'));
 }
 
