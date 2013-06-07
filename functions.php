@@ -124,7 +124,7 @@ function station_activity($station_id, $output='json', $since=6) {
 
   $j = "SELECT `id`, `stationName` FROM stations y WHERE `id`=%d";
 
-  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes FROM station_status WHERE station_id=%d and (stamp > NOW() - INTERVAL %d HOUR) %s ORDER BY stamp ASC;";
+  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes, (totalDocks - availableDocks - availableBikes) Null_Docks FROM station_status WHERE station_id=%d and (stamp > NOW() - INTERVAL %d HOUR) %s ORDER BY stamp ASC;";
 
   $data = $wpdb->get_results(sprintf($q, $station_id, $since, $filter));
   $hed = $wpdb->get_results(sprintf($j, $station_id));
