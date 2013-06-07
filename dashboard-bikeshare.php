@@ -52,11 +52,11 @@ foreach($station_data as $stn)
 <div class="row">
 
   <div class="span3">
-    <h3>Available docks and bikes</h3>
+    <h3>Docks and bikes</h3>
       <div id="overview" class="d3-graph"></div>
   </div>
   <div class="span3">
-    <h3>Full and empty stations</h3>
+    <h3>Stations</h3>
 
     <div id="fullempty" class="d3-graph"></div>
   </div>
@@ -131,18 +131,16 @@ foreach($station_data as $stn)
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.number); });
 
-    var svg = d3.select("#overview").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+    d3.selectAll('.d3-graph').append('svg')
+        .attr("height", height + margin.top + margin.bottom);
+
+    var svg1 = d3.select("#overview").select("svg")
+      .attr("width", width + margin.left + margin.right)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    margin.left = 30;
-    margin.right = 100;
-    
-    var svg2 = d3.select("#fullempty").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+    var svg2 = d3.select("#fullempty").select("svg")
+      .attr("width", width + margin.left - 12 + margin.right + 70)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -181,16 +179,16 @@ foreach($station_data as $stn)
 
       x.domain(d3.extent(data, function(d) { return d.stamp; }));
       y1.domain([
-          d3.min(overviewData, function(c) { return d3.min(c.values, function(v) { return v.number-1000; }); }),
+          d3.min(overviewData, function(c) { return d3.min(c.values, function(v) { return v.number-250; }); }),
           d3.max(overviewData, function(c) { return d3.max(c.values, function(v) { return v.number; }); })
       ]);
 
-        svg.append("g")
+        svg1.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
             .call(xAxis);
 
-        svg.append("g")
+        svg1.append("g")
             .attr("class", "y axis")
             .call(yAxis)
           .append("text")
@@ -199,18 +197,18 @@ foreach($station_data as $stn)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
    
-      var bike = svg.selectAll(".bike")
+      var bike1 = svg1.selectAll(".bike")
         .data(overviewData)
       .enter().append("g")
         .attr("class", "bike")
         .attr('name', function(d){ return d.name; });
 
-        bike.append("path")
+        bike1.append("path")
             .attr("class", "line")
             .attr("d", function(d) { return line(d.values); })
             .style("stroke", function(d) { return color(d.name); });
 
-        bike.append("text")
+        bike1.append("text")
             .datum(function(d) { return {name: d.name.replace('_',  ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
             .attr("x", -70)
