@@ -50,7 +50,19 @@ $queries = array(
   "INSERT_ROW" => 'INSERT INTO station_status (station_id, availableDocks, totalDocks, statusValue, statusKey, availableBikes, lastCommunicationTime, stamp) VALUES (:id, :availableDocks, :totalDocks, :statusValue, :statusKey, :availableBikes, :lastCommunicationTime, :stamp)',
   "INSERT_STATION" => 'INSERT INTO stations (id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark) VALUES (:id, :stationName, :latitude, :longitude, :stAddress1, :stAddress2, :city, :postalCode, :location, :altitude, :landMark)',
   // 1 is the geoid for all of NYC
-  "INSERT_STATUS" => "INSERT INTO status_report (stamp, geo_id, availBikes, availDocks, totalDocks, fullStations, emptyStations) SELECT stamp, 1 geoid, sum(availableBikes), sum(availableDocks), sum(totalDocks), COUNT(IF(statusKey=1 AND availableDocks=0, 1, NULL)) fullStations, COUNT(IF(statusKey=1 AND availableBikes=0, 1, NULL)) emptyStations FROM station_status WHERE stamp=:stamp"
+  "INSERT_STATUS" => "INSERT INTO status_report
+  (stamp, geo_id, availBikes, availDocks, nullDocks, totalDocks, fullStations, emptyStations, plannedStations, inactiveStations)
+  SELECT
+  stamp, 1 geo_id,
+  SUM(IF(statusKey=1, availableBikes, NULL)) availBikes,
+  SUM(IF(statusKey=1, availableDocks, NULL)) availDocks,
+  SUM(IF(statusKey=1, totalDocks-availableDocks-availableBikes, NULL)) nullDocks,
+  SUM(IF(statusKey=1, totalDocks, NULL)) totalDocks,
+  COUNT(IF(statusKey=1 AND availableDocks=0, 1, NULL)) fullStations,
+  COUNT(IF(statusKey=1 AND availableBikes=0, 1, NULL)) emptyStations,
+  COUNT(IF(statusKey=2, 1, NULL)) plannedStations,
+  COUNT(IF(statusKey=3, 1, NULL)) inactiveStations
+  FROM station_status WHERE stamp=:stamp"
   );
 
 $param_keys = array(
