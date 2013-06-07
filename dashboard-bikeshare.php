@@ -265,19 +265,10 @@ foreach($station_data as $stn)
 <script src="<?php echo get_template_directory_uri(); ?>/js/station-map.js"></script>
 <script src="<?php echo get_stylesheet_directory_uri(); ?>/js/map-dashboard.js"></script>
 <script type="text/javascript" id="globals">
-  var map, markers, infowindow, overlay, newPointMarker, permalinked, tickers,
-  params = {},
-  DIRECTORY_URI = '<?php echo get_template_directory_uri(); ?>',
-  ICON_BREAKPOINT = 13,
+  var ICON_BREAKPOINT = 13,
   HOME_URL = '<?php echo home_url(); ?>',
-  BIKE_LAYER = true;
-  INTERACTIVE = false,
-  ENDPOINT = "<?php echo home_url(); ?>/get_station_locations",
-  infoWindowStyle = 'static';
-
-  // showLoading();
-  getPoints(ENDPOINT, INTERACTIVE);
-  bikemapinit(BIKE_LAYER);
+  ENDPOINT = "<?php echo home_url(); ?>/get_station_locations";
+  bikemapinit(ENDPOINT);
 </script>
 
 <?php get_footer(); ?>
