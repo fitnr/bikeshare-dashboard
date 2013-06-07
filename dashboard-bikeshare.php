@@ -102,7 +102,7 @@ foreach($station_data as $stn)
 
 <script>
     var since = <?php echo $kwargs['since'] ;?>;
-    var margin = {top: 10, right: 30, bottom: 30, left: 42},
+    var margin = {top: 13, right: 30, bottom: 30, left: 42},
         width = 540 - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
 
@@ -212,7 +212,7 @@ foreach($station_data as $stn)
             .datum(function(d) { return {name: d.name.replace('_',  ' '), value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
             .attr("x", -70)
-            .attr("dy", "1.2em")
+            .attr("dy", "-0.33em")
             .text(function(d) { return d.name; });
 
         // Full or Empty graph
