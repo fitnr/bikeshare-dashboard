@@ -28,11 +28,12 @@ get_header();
 <div id="activity" class="d3-graph"></div>
 
 <p>"Null" docks aren't shown as either being filled with bikes or available.</p>
-<hr>
 
 <p><a href="../station_activity_csv/<?php echo $station_id . '/?since=' . $since ?>">Download data (csv)</a></p>
 
-<p><a href="../bikeshare-dashboard/">System Dashboard</a></p>
+<hr>
+
+<p><a href="../bikeshare-dashboard/">⃪ System Dashboard</a></p>
 
 <script>
     var since = <?php echo $since; ?>,
