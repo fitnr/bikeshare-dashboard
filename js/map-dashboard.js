@@ -23,9 +23,19 @@ var color = d3.scale.ordinal()
     .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]);
 
 function createMarker (map, d) {
-
-  var strokeColor = color(d.availableBikes / d.availableDocks),
-    strokeWeight = 0.88;
+  var strokeColor = color(d.availableBikes / d.totalDocks),
+    strokeWeight = 0.88,
+    full = ( +d.fullFlag == 1 ) ? '<p><small>Full</small></p>' : '';
+    empty = ( +d.emptyFlag == 1) ? '<p><small>Empty</small></p>' : '';
+    content = 
+      '<h4><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h4>' +
+      '<p><small>Available docks: ' + d.availableDocks + '<br>'+
+      'Available bikes: ' + d.availableBikes + '<br>'+
+      'Total docks: ' + d.totalDocks + '<br>' +
+      'Status: ' + d.statusValue + '</small>' +
+      '</p>'+
+      full + 
+      empty ;
 
   if (d.fullFlag == 1) {
     strokeColor = "#FF0000";
@@ -34,15 +44,17 @@ function createMarker (map, d) {
     strokeColor = "#00FF00";
     strokeWeight = 1;
   }
+
   var opts = {
     strokeColor: strokeColor,
-    strokeOpacity: 1,
+    strokeOpacity: 0.85,
     strokeWeight: strokeWeight,
-    fillColor: color(d.availableBikes / d.availableDocks),
+    fillColor: color(d.availableBikes / d.totalDocks),
     fillOpacity: 0.69,
     map: map,
     center: new google.maps.LatLng(d.lat, d.lon),
-    radius: d.availableDocks * 7
+    radius: d.totalDocks * 4.5,
+    content: content, // for infowindow
   };
   var marker = new google.maps.Circle(opts);
   google.maps.event.addListener(marker, 'click', function() { infoWindowOpen(marker); });

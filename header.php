@@ -77,6 +77,9 @@
           stroke: steelblue;
           stroke-width: 3px;
         }
+        /* fix for bootstrap/gmap style conflict */
+        .gmap img { max-width: none; }
+
     </style>
 
   <?php wp_head(); ?>
