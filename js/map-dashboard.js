@@ -1,3 +1,10 @@
+// declare globals
+var infoWindow,
+  map,
+  color = d3.scale.ordinal()
+    .domain([0, 1])
+    .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]);
+
 function BikeshareOverlay(map) { this.setMap(map); }
 
 BikeshareOverlay.prototype = new google.maps.OverlayView();
@@ -18,24 +25,18 @@ function getPoints (map, url) {
 
 function markerSize(breakpoint) { return (map.getZoom() > breakpoint ? 'large' : 'small'); }
 
-var color = d3.scale.ordinal()
-    .domain([0, 1])
-    .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]);
-
 function createMarker (map, d) {
   var strokeColor = color(d.availableBikes / d.totalDocks),
     strokeWeight = 0.88,
-    full = ( +d.fullFlag == 1 ) ? '<p><small>Full</small></p>' : '';
-    empty = ( +d.emptyFlag == 1) ? '<p><small>Empty</small></p>' : '';
-    content = 
+    full = ( +d.fullFlag == 1 ) ? '<p><small>Full</small></p>' : '',
+    empty = ( +d.emptyFlag == 1) ? '<p><small>Empty</small></p>' : '',
+    content =
       '<h4><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h4>' +
       '<p><small>Available docks: ' + d.availableDocks + '<br>'+
       'Available bikes: ' + d.availableBikes + '<br>'+
       'Total docks: ' + d.totalDocks + '<br>' +
-      'Status: ' + d.statusValue + '</small>' +
-      '</p>'+
-      full + 
-      empty ;
+      'Status: ' + d.statusValue + '</small></p>'+
+      full + empty;
 
   if (d.fullFlag == 1) {
     strokeColor = "#FF0000";
@@ -67,7 +68,7 @@ function infoWindowOpen (marker) {
 }
 
 function bikemapinit(endpoint) {
-  var myLatlng = new google.maps.LatLng(40.729, -73.99),
+  var myLatlng = new google.maps.LatLng(40.7258, -73.9889),
     options = {
       zoom: 13,
       disableDefaultUI: true,
@@ -79,15 +80,14 @@ function bikemapinit(endpoint) {
       scrollwheel: true,
       maxZoom: 18,
       minZoom: 12
-    },
-    map = new google.maps.Map(document.getElementById("the-map"), options),
-    overlay = new BikeshareOverlay(map),
     };
   infoWindow = new google.maps.InfoWindow({
       content: "",
       disableAutoPan: false,
       zIndex: null
   });
+  map = new google.maps.Map(document.getElementById("the-map"), options);
+  var overlay = new BikeshareOverlay(map),
     bikeLayer = new google.maps.BicyclingLayer();
     bikeLayer.setMap(map);
     getPoints(map, endpoint);
