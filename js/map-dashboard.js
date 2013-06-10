@@ -11,7 +11,7 @@ BikeshareOverlay.prototype.draw = function() {
 function getPoints (map, url) {
   d3.json(url, function(error, data) {
     data.forEach(function(d){
-      marker = createMarker(map, d);
+      createMarker(map, d);
     });
   });
 }
@@ -44,22 +44,16 @@ function createMarker (map, d) {
     center: new google.maps.LatLng(d.lat, d.lon),
     radius: d.availableDocks * 7
   };
-  return new google.maps.Circle(opts);
+  var marker = new google.maps.Circle(opts);
+  google.maps.event.addListener(marker, 'click', function() { infoWindowOpen(marker); });
 }
 
-function infoWindowD (m) {
-  var out = '<div class="infowindow-container">' +
-       '<h4 class="infowindow-header">' + m.stationName + '</h4>' +
-        '<p><small>availableDocks = ' + m.availableDocks + '<br>'+
-        'availableBikes = ' + m.availableBikes + '<br>'+
-        'totalDocks = ' + m.totalDocks + '<br>'+
-        'fullFlag = ' + m.fullFlag + '<br>'+
-        'emptyFlag = ' + m.emptyFlag + '<br>'+
-        'statusValue = ' + m.statusValue + '</small></p></div>';
-  console.log(out);
-  infowindow.setContent(out);
-  infowindow.open(map, m);
+function infoWindowOpen (marker) {
+  infoWindow.setPosition(marker.getCenter());
+  infoWindow.setContent(marker.content);
+  infoWindow.open(map);
 }
+
 function bikemapinit(endpoint) {
   var myLatlng = new google.maps.LatLng(40.729, -73.99),
     options = {
