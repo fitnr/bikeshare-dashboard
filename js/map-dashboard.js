@@ -3,9 +3,17 @@ var infoWindow,
   map,
   color = d3.scale.ordinal()
     .domain([0, 1])
-    .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]);
+    .range(["#ffffcc","#ffeda0","#fed976","#feb24c","#fd8d3c","#fc4e2a","#e31a1c","#bd0026","#800026"]),
+    // .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]),
+  legend = d3.select("#legend").append('svg').append('g').attr('class', 'legend');
 
 function BikeshareOverlay(map) { this.setMap(map); }
+legend
+  .append('text')
+  .text('station fullness')
+  .attr('class', 'legtitle')
+  .attr('x', 0)
+  .attr('y', 11);
 
 BikeshareOverlay.prototype = new google.maps.OverlayView();
 BikeshareOverlay.prototype.draw = function() {
@@ -14,6 +22,54 @@ BikeshareOverlay.prototype.draw = function() {
     google.maps.event.trigger(this, 'ready');
   }
 };
+legend.selectAll('rect.full')
+  .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
+.enter().append('rect')
+  .attr('class', 'full')
+  .style('fill', function(d){ return color(d); })
+  .style('opacity', 0.85)
+  .style('stroke', function(d){ return color(d); })
+  .style('stroke-opacity', 0.9)
+  .attr('x', 0)
+  .attr('y', function(d, i){ return 18 + (i * 20); })
+  .attr('width', 15)
+  .attr('height', 15);
+
+function circ(c) { c.attr('r', 7).attr('cx', 8); }
+
+legend
+  .append('circle')
+  .call(circ)
+  .attr('cy', 160)
+  .style('stroke', '#ff0000');
+
+legend
+  .append('circle')
+  .call(circ)
+  .attr('cy', 180)
+  .style('stroke', '#023858');
+
+legend
+  .append('text')
+  .attr('class', 'empty')
+  .attr('x', 20)
+  .attr('y', 162)
+  .text('empty');
+
+legend
+  .append('text')
+  .attr('class', 'full')
+  .attr('x', 20)
+  .attr('y', 182)
+  .text('full');
+
+legend.selectAll('text.label')
+  .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
+.enter().append('text')
+  .attr('class', 'label')
+  .attr('x', 20)
+  .attr('y', function(d, i){ return 30 + (i * 20); })
+  .text(function (d) { return (100 * d).toFixed(0) + '%'; });
 
 function getPoints (map, url) {
   d3.json(url, function(error, data) {
@@ -41,9 +97,12 @@ function createMarker (map, d) {
   if (d.fullFlag == 1) {
     strokeColor = "#FF0000";
     strokeWeight = 1;
+    strokeWeight = 1.24;
   } else if (d.emptyFlag == 1) {
     strokeColor = "#00FF00";
     strokeWeight = 1;
+    strokeColor = "#023858";
+    strokeWeight = 1.24;
   }
 
   var opts = {

@@ -14,6 +14,7 @@ get_header();
 </style>
 
 <div class="row map-container">
+	<div id="legend"></div>
   <div id="the-map" class="gmap"></div>
 </div>
 
