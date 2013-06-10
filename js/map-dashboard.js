@@ -76,6 +76,12 @@ function bikemapinit(endpoint) {
     },
     map = new google.maps.Map(document.getElementById("the-map"), options),
     overlay = new BikeshareOverlay(map),
+    };
+  infoWindow = new google.maps.InfoWindow({
+      content: "",
+      disableAutoPan: false,
+      zIndex: null
+  });
     bikeLayer = new google.maps.BicyclingLayer();
     bikeLayer.setMap(map);
     getPoints(map, endpoint);

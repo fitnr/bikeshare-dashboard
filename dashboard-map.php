@@ -22,7 +22,6 @@ get_header();
 </div>
 <!-- Google Map's API -->
 <script src="http://maps.google.com/maps/api/js?v=3.5&amp;sensor=false"></script>
-<script src="<?php echo get_template_directory_uri(); ?>/js/infobox.min.js"></script>
 <script src="<?php echo get_stylesheet_directory_uri(); ?>/js/map-dashboard.js"></script>
 <script type="text/javascript" id="globals">
   bikemapinit("<?php echo home_url(); ?>/get_station_locations");
