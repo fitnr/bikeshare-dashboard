@@ -64,7 +64,6 @@
           stroke: #000;
           shape-rendering: crispEdges;
         }
-
         .x.axis path {
           display: none;
         }
@@ -98,6 +97,10 @@
         }
         /* fix for bootstrap/gmap style conflict */
         .gmap img { max-width: none; }
+
+        .infowindow {
+          line-height: 1.1em;
+        }
 
     </style>
 
