@@ -7,7 +7,6 @@ var infoWindow,
     // .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]),
   legend = d3.select("#legend").append('svg').append('g').attr('class', 'legend');
 
-function BikeshareOverlay(map) { this.setMap(map); }
 legend
   .append('text')
   .text('station fullness')
@@ -15,13 +14,6 @@ legend
   .attr('x', 0)
   .attr('y', 11);
 
-BikeshareOverlay.prototype = new google.maps.OverlayView();
-BikeshareOverlay.prototype.draw = function() {
-  if (!this.ready) {
-    this.ready = true;
-    google.maps.event.trigger(this, 'ready');
-  }
-};
 legend.selectAll('rect.full')
   .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
 .enter().append('rect')
@@ -79,8 +71,6 @@ function getPoints (map, url) {
   });
 }
 
-function markerSize(breakpoint) { return (map.getZoom() > breakpoint ? 'large' : 'small'); }
-
 function createMarker (map, d) {
   var strokeColor = color(d.availableBikes / d.totalDocks),
     strokeWeight = 0.88,
@@ -96,11 +86,8 @@ function createMarker (map, d) {
 
   if (d.fullFlag == 1) {
     strokeColor = "#FF0000";
-    strokeWeight = 1;
     strokeWeight = 1.24;
   } else if (d.emptyFlag == 1) {
-    strokeColor = "#00FF00";
-    strokeWeight = 1;
     strokeColor = "#023858";
     strokeWeight = 1.24;
   }
@@ -113,8 +100,8 @@ function createMarker (map, d) {
     fillOpacity: 0.69,
     map: map,
     center: new google.maps.LatLng(d.lat, d.lon),
-    radius: d.totalDocks * 4.5,
-    content: content, // for infowindow
+    radius: d.totalDocks * 4.25,
+    content: content // for infowindow
   };
   var marker = new google.maps.Circle(opts);
   google.maps.event.addListener(marker, 'click', function() { infoWindowOpen(marker); });
@@ -146,8 +133,7 @@ function bikemapinit(endpoint) {
       zIndex: null
   });
   map = new google.maps.Map(document.getElementById("the-map"), options);
-  var overlay = new BikeshareOverlay(map),
-    bikeLayer = new google.maps.BicyclingLayer();
+  var bikeLayer = new google.maps.BicyclingLayer();
     bikeLayer.setMap(map);
     getPoints(map, endpoint);
 }
