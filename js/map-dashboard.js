@@ -127,11 +127,8 @@ function circleMarker (map, d) {
   this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
   this.set('strokeColor', setStrokeColor(d));
   this.set('radius', setRadius(d.totalDocks));
-  this.set('fillColor', color(d.availableBikes / d.totalDocks));
-  this.set('position', new google.maps.LatLng(d.lat, d.lon));
   this.set('fillColor', setFillColor(d));
   this.id = d.id;
-  console.log(this);
 
   // Set the circle options
   opts = {
@@ -141,26 +138,21 @@ function circleMarker (map, d) {
     fillColor: this.fillColor,
     fillOpacity: 0.69,
     map: map,
-    center: this.position,
+    center: new google.maps.LatLng(d.lat, d.lon),
     radius: this.radius,
     content: this.content // for infowindow
   };
 
-  circle = new google.maps.Circle(opts);
   // Create the circle
+  this.circle = new google.maps.Circle(opts);
 
   // bind things to our circle
-  circle.bindTo('radius', this);
-  circle.bindTo('fillColor', this);
-  circle.bindTo('strokeWeight', this);
-  circle.bindTo('strokeColor', this);
-  console.log(circle);
+  this.circle.bindTo('radius', this);
+  this.circle.bindTo('fillColor', this);
+  this.circle.bindTo('strokeWeight', this);
+  this.circle.bindTo('strokeColor', this);
 
-  google.maps.event.addListener(circle, 'click', function() {
-    infoWindow.setPosition(this.getCenter());
-    infoWindow.setContent(this.content);
-    infoWindow.open(map);
-  });
+  google.maps.event.addListener(this.circle, 'click', function(){ infoWindowOpen(this); });
 }
 
 function infoWindowOpen (circle) {
