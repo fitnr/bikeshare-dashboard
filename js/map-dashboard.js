@@ -11,7 +11,6 @@ var infoWindow,
   color = d3.scale.quantize()
     .domain([0, 1])
     .range(["#bcbddc","#9e9ac8","#807dba","#6a51a3","#54278f","#3f007d","#2c0057"]),
-    // .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]),
   legend = d3.select("#legend svg g");
 
 // Create data labels with arbitratry values

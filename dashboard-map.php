@@ -41,8 +41,8 @@ get_header();
 <script src="http://maps.google.com/maps/api/js?v=3.5&amp;sensor=false"></script>
 <script src="<?php echo get_stylesheet_directory_uri(); ?>/js/map-dashboard.js"></script>
 <script type="text/javascript" id="globals">
-	var directory = "<?php echo home_url(); ?>/get_station_locations";
-	google.maps.event.addListener(window, 'domready', bikemapinit(directory));
+	var endpoint = "<?php echo home_url(); ?>/get_station_locations";
+	google.maps.event.addListener(window, 'domready', bikemapinit(endpoint));
 </script>
 
 <?php get_footer(); ?>
