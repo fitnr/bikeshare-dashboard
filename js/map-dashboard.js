@@ -94,15 +94,16 @@ function setStrokeWeight(avail, fullFlag, emptyFlag) {
 }
 
 function setContent(d) {
-  var full = ( +d.fullFlag == 1 ) ? '<p><small>Full</small></p>' : '',
-      empty = ( +d.emptyFlag == 1) ? '<p><small>Empty</small></p>' : '',
+  var full = ( +d.fullFlag == 1 ) ? '<br>Station is full' : '',
+      empty = ( +d.emptyFlag == 1) ? '<br>Station is empty' : '',
       content =
       '<h5><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h5>' +
       '<p class="infowindow"><small>Available docks: ' + d.availableDocks + '<br>'+
       'Available bikes: ' + d.availableBikes + '<br>'+
       'Total docks: ' + d.totalDocks + '<br>' +
-      'Status: ' + d.statusValue + '</small></p>'+
-      full + empty;
+      'Status: ' + d.statusValue +
+      full + empty +
+      '</small></p>';
   return content;
 }
 
@@ -132,6 +133,7 @@ function circleMarker (map, d) {
   this.id = d.id;
   console.log(this);
 
+  // Set the circle options
   opts = {
     strokeColor: this.strokeColor,
     strokeOpacity: 0.85,
@@ -145,6 +147,7 @@ function circleMarker (map, d) {
   };
 
   circle = new google.maps.Circle(opts);
+  // Create the circle
 
   // bind things to our circle
   circle.bindTo('radius', this);
@@ -161,7 +164,6 @@ function circleMarker (map, d) {
 }
 
 function infoWindowOpen (circle) {
-  console.log(circle);
   infoWindow.setPosition(circle.getCenter());
   infoWindow.setContent(circle.content);
   infoWindow.open(map);
