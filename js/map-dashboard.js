@@ -63,7 +63,7 @@ function getPoints (map, url) {
     data.forEach(function(d){
       if (d.statusValue == 'Planned') { return; }
       marker = new circleMarker(map, d);
-      markers[marker.id] = marker;
+      markers[d.id] = marker;
     });
   });
 }
@@ -121,45 +121,29 @@ function setFillColor(d) {
 circleMarker.prototype = new google.maps.MVCObject();
 
 circleMarker.prototype.update = function(d) {
-  this.set('radius', setRadius(d.totalDocks));
-  this.set('fillColor', setFillColor(d));
-  this.set('strokeColor', setStrokeColor(d));
-  this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
-  this.set('content', setContent(d));
+  this.circle.set('radius', setRadius(d.totalDocks));
+  this.circle.set('fillColor', setFillColor(d));
+  this.circle.set('strokeColor', setStrokeColor(d));
+  this.circle.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
+  this.circle.set('content', setContent(d));
 };
 
 function circleMarker (map, d) {
-  // set variables in google MVC fashion
-  this.set('content', setContent(d));
-  this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
-  this.set('strokeColor', setStrokeColor(d));
-  this.set('radius', setRadius(d.totalDocks));
-  this.set('fillColor', setFillColor(d));
-  this.id = d.id;
-
   // Set the circle options
-    strokeColor: this.strokeColor,
   var opts = {
+    strokeColor: setStrokeColor(d),
     strokeOpacity: 0.85,
-    strokeWeight: this.strokeWeight,
-    fillColor: this.fillColor,
+    strokeWeight: setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag),
+    fillColor: setFillColor(d),
     fillOpacity: 0.69,
     map: map,
     center: new google.maps.LatLng(d.lat, d.lon),
-    radius: this.radius,
-    content: this.content // for infowindow
+    radius: setRadius(d.totalDocks),
+    content: setContent(d) // for infowindow
   };
 
   // Create the circle
   this.circle = new google.maps.Circle(opts);
-
-  // bind things to our circle
-  this.circle.bindTo('radius', this);
-  this.circle.bindTo('fillColor', this);
-  this.circle.bindTo('strokeWeight', this);
-  this.circle.bindTo('strokeColor', this);
-  this.circle.bindTo('content', this);
-
   google.maps.event.addListener(this.circle, 'click', function(){ infoWindowOpen(this); });
 }
 
