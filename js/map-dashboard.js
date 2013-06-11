@@ -5,7 +5,8 @@ var infoWindow,
   legendCircles = [
     {text:'empty', 'stroke': '#ff0000', 'fill': 'none'},
     {text:'full', 'stroke': '#023858', 'fill': 'none'},
-    {text:'not in service', 'stroke': 'none', 'fill': '#ff0000'}
+    {text:'not in service', 'stroke': 'none', 'fill': '#ff0000'},
+    {text: 'planned', 'stroke': '#0033dd', 'fill': 'none', 'strokewidth': 2.25}
   ],
   color = d3.scale.quantize()
     .domain([0, 1])
@@ -61,7 +62,6 @@ legend.selectAll('text.label')
 function getPoints (map, url) {
   d3.json(url, function(error, data) {
     data.forEach(function(d){
-      if (d.statusValue == 'Planned') { return; }
       marker = new circleMarker(map, d);
       markers[d.id] = marker;
     });
@@ -71,7 +71,6 @@ function getPoints (map, url) {
 function updateMarkers(url) {
   d3.json(url, function(data){
     data.forEach(function(d) {
-      if (d.statusValue == 'Planned') { return; }
       try {
         markers[d.id].update(d);
       } catch (err) {
@@ -90,24 +89,31 @@ function setStrokeColor(d) {
     return "#FF0000";
   if (d.totalDocks === 0)
     return '#000000';
+  if (d.statusValue == 'Planned')
+    return '#0033dd';
   return color(d.availableBikes / d.totalDocks);
 }
 
-function setStrokeWeight(avail, fullFlag, emptyFlag) {
-  if (avail === 0)
+function setStrokeWeight(d) {
+  if (d.availableBikes === 0)
     return 0;
-  return (fullFlag == 1 || emptyFlag == 1) ? 1.00 : 0.88;
+  if (d.statusValue === 'Planned')
+    return 2.25;
+  return (d.fullFlag == 1 || d.emptyFlag == 1) ? 1.00 : 0.88;
 }
 
 function setContent(d) {
   var full = ( +d.fullFlag == 1 ) ? '<br>Station is full' : '',
       empty = ( +d.emptyFlag == 1) ? '<br>Station is empty' : '',
+      status = ( d.statusValue == 'Not In Service' ) ? '<br>Station out of service' : (
+        ( d.statusValue == 'Planned' ) ? '<br>Planned station' : ''
+      ),
       content =
       '<h5><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h5>' +
       '<p class="infowindow"><small>Available docks: ' + d.availableDocks + '<br>'+
       'Available bikes: ' + d.availableBikes + '<br>'+
-      'Total docks: ' + d.totalDocks + '<br>' +
-      'Status: ' + d.statusValue +
+      'Total docks: ' + d.totalDocks +
+      status +
       full + empty +
       '</small></p>';
   return content;
@@ -115,6 +121,7 @@ function setContent(d) {
 
 function setFillColor(d) {
   if (d.statusValue == 'Not In Service') return '#ff0000';
+  if (d.statusValue == 'Planned') return 'transparent';
   return color(d.availableBikes / d.totalDocks);
 }
 
@@ -124,7 +131,7 @@ circleMarker.prototype.update = function(d) {
   this.circle.set('radius', setRadius(d.totalDocks));
   this.circle.set('fillColor', setFillColor(d));
   this.circle.set('strokeColor', setStrokeColor(d));
-  this.circle.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
+  this.circle.set('strokeWeight', setStrokeWeight(d));
   this.circle.set('content', setContent(d));
 };
 
@@ -133,12 +140,13 @@ function circleMarker (map, d) {
   var opts = {
     strokeColor: setStrokeColor(d),
     strokeOpacity: 0.85,
-    strokeWeight: setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag),
+    strokeWeight: setStrokeWeight(d),
     fillColor: setFillColor(d),
     fillOpacity: 0.69,
     map: map,
+    planned: d.statusValue === 'Planned',
     center: new google.maps.LatLng(d.lat, d.lon),
-    radius: setRadius(d.totalDocks),
+    radius: (d.statusValue === 'Planned') ? 75 : setRadius(d.totalDocks),
     content: setContent(d) // for infowindow
   };
 
