@@ -11,6 +11,7 @@ var infoWindow,
   color = d3.scale.quantize()
     .domain([0, 1])
     .range(["#bcbddc","#9e9ac8","#807dba","#6a51a3","#54278f","#3f007d","#2c0057"]),
+
   legend = d3.select("#legend svg g");
 
 // Create data labels with arbitratry values
@@ -142,6 +143,7 @@ function bikemapinit(endpoint) {
       disableDefaultUI: true,
       keyboardShortcuts: true,
       streetViewControl: false,
+      zoomControl: true,
       panControl: false,
       center: myLatlng,
       mapTypeId: google.maps.MapTypeId.ROADMAP,

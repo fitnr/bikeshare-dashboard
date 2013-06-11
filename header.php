@@ -78,9 +78,13 @@
         }
         #legend { 
           position: absolute;
-          left: 10px;
-          height: 240px;
-          width: 100px;
+          left: 69px;
+          height: 211px;
+          width: 83px;
+          z-index: 10;
+          background-color: white;
+          padding: 10px;
+          bottom: 37px;
         }
         .legend text {
           font: 10px sans-serif;
