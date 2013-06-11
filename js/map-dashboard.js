@@ -1,6 +1,7 @@
 // declare globals
 var infoWindow,
   map,
+  markers = {},
   color = d3.scale.quantize()
     .domain([0, 1])
     .range(["#bcbddc","#9e9ac8","#807dba","#6a51a3","#54278f","#3f007d","#2c0057"]),
@@ -16,7 +17,7 @@ legend
 
 legend.selectAll('rect.full')
   .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
-.enter().append('rect')
+  .enter().append('rect')
   .attr('class', 'full')
   .style('fill', function(d){ return color(d); })
   .style('opacity', 0.85)
@@ -57,7 +58,7 @@ legend
 
 legend.selectAll('text.label')
   .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
-.enter().append('text')
+  .enter().append('text')
   .attr('class', 'label')
   .attr('x', 20)
   .attr('y', function(d, i){ return 30 + (i * 20); })
@@ -66,48 +67,95 @@ legend.selectAll('text.label')
 function getPoints (map, url) {
   d3.json(url, function(error, data) {
     data.forEach(function(d){
-      createMarker(map, d);
+      if (d.statusValue == 'Planned') { return; }
+      marker = new circleMarker(map, d);
+      markers[marker.id] = marker;
     });
   });
 }
 
-function createMarker (map, d) {
-  var strokeColor = color(d.availableBikes / d.totalDocks),
-    strokeWeight = 0.88,
-    full = ( +d.fullFlag == 1 ) ? '<p><small>Full</small></p>' : '',
-    empty = ( +d.emptyFlag == 1) ? '<p><small>Empty</small></p>' : '',
-    content =
-      '<h4><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h4>' +
-      '<p><small>Available docks: ' + d.availableDocks + '<br>'+
+function updateMarkers(url) {
+  d3.json(url, function(data){
+    data.forEach(function(d) {
+      markers[d.id].update(d);
+    });
+  });
+}
+
+function setRadius(r) { return r * 4.05; }
+
+function setStrokeColor(d) {
+  if (d.fullFlag == 1) {
+    return "#FF0000";
+  } else if (d.emptyFlag == 1) {
+    return "#023858";
+  }
+  if (d.totalDocks === 0) { return '#000000'; }
+  return color(d.availableBikes / d.totalDocks);
+}
+
+function setStrokeWeight(avail, fullFlag, emptyFlag) {
+  if (avail === 0) { return 0; }
+  return (fullFlag == 1 || emptyFlag == 1) ? 1.24 : 0.88;
+}
+
+function setContent(d) {
+  var full = ( +d.fullFlag == 1 ) ? '<p><small>Full</small></p>' : '',
+      empty = ( +d.emptyFlag == 1) ? '<p><small>Empty</small></p>' : '',
+      content =
+      '<h5><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h5>' +
+      '<p class="infowindow"><small>Available docks: ' + d.availableDocks + '<br>'+
       'Available bikes: ' + d.availableBikes + '<br>'+
       'Total docks: ' + d.totalDocks + '<br>' +
       'Status: ' + d.statusValue + '</small></p>'+
       full + empty;
+  return content;
+}
 
-  if (d.fullFlag == 1) {
-    strokeColor = "#FF0000";
-    strokeWeight = 1.24;
-  } else if (d.emptyFlag == 1) {
-    strokeColor = "#023858";
-    strokeWeight = 1.24;
-  }
+circleMarker.prototype = new google.maps.MVCObject();
 
-  var opts = {
-    strokeColor: strokeColor,
+circleMarker.prototype.update = function(d) {
+  this.set('radius', setRadius(d.totalDocks));
+  this.set('fillColor', color(d.availableBikes / d.totalDocks));
+  this.set('strokeColor', color(d.availableBikes / d.totalDocks));
+  this.set('strokeWeight', setStrokeWeight(d.fullFlag, d.emptyFlag));
+};
+
+function circleMarker (map, d) {
+  // set variables in google MVC fashion
+  this.set('content', setContent(d));
+  this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
+  this.set('strokeColor', setStrokeColor(d));
+  this.set('radius', setRadius(d.totalDocks));
+  this.set('fillColor', color(d.availableBikes / d.totalDocks));
+  this.id = d.id;
+  console.log(this);
+
+  opts = {
+    strokeColor: this.strokeColor,
     strokeOpacity: 0.85,
-    strokeWeight: strokeWeight,
-    fillColor: color(d.availableBikes / d.totalDocks),
+    strokeWeight: this.strokeWeight,
+    fillColor: this.fillColor,
     fillOpacity: 0.69,
     map: map,
     center: new google.maps.LatLng(d.lat, d.lon),
-    radius: d.totalDocks * 4.25,
-    content: content // for infowindow
+    radius: this.radius,
+    content: this.content // for infowindow
   };
-  var marker = new google.maps.Circle(opts);
-  google.maps.event.addListener(marker, 'click', function() { infoWindowOpen(marker); });
+
+  circle = new google.maps.Circle(opts);
+
+  // bind things to our circle
+  circle.bindTo('radius', this);
+  circle.bindTo('fillColor', this);
+  circle.bindTo('strokeWeight', this);
+  circle.bindTo('strokeColor', this);
+  console.log(circle);
+  google.maps.event.addListener(circle, 'click', function() { infoWindowOpen(circle); });
 }
 
 function infoWindowOpen (marker) {
+  console.log(marker);
   infoWindow.setPosition(marker.getCenter());
   infoWindow.setContent(marker.content);
   infoWindow.open(map);
@@ -136,4 +184,5 @@ function bikemapinit(endpoint) {
   var bikeLayer = new google.maps.BicyclingLayer();
     bikeLayer.setMap(map);
     getPoints(map, endpoint);
+  // setInterval("updateMarkers", 6000);
 }
