@@ -81,9 +81,9 @@ function setRadius(r) { return r * 4.05; }
 
 function setStrokeColor(d) {
   if (d.fullFlag == 1) {
-    return "#FF0000";
-  } else if (d.emptyFlag == 1) {
     return "#023858";
+  } else if (d.emptyFlag == 1) {
+    return "#FF0000";
   }
   if (d.totalDocks === 0) { return '#000000'; }
   return color(d.availableBikes / d.totalDocks);
@@ -91,7 +91,7 @@ function setStrokeColor(d) {
 
 function setStrokeWeight(avail, fullFlag, emptyFlag) {
   if (avail === 0) { return 0; }
-  return (fullFlag == 1 || emptyFlag == 1) ? 1.24 : 0.88;
+  return (fullFlag == 1 || emptyFlag == 1) ? 1.00 : 0.88;
 }
 
 function setContent(d) {
