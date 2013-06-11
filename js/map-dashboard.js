@@ -72,7 +72,11 @@ function updateMarkers(url) {
   d3.json(url, function(data){
     data.forEach(function(d) {
       if (d.statusValue == 'Planned') { return; }
-      markers[d.id].update(d);
+      try {
+        markers[d.id].update(d);
+      } catch (err) {
+        console.log(d.id, err.message);
+      }
     });
   });
 }
@@ -80,17 +84,18 @@ function updateMarkers(url) {
 function setRadius(r) { return r * 4.05; }
 
 function setStrokeColor(d) {
-  if (d.fullFlag == 1) {
+  if (d.fullFlag == 1)
     return "#023858";
-  } else if (d.emptyFlag == 1) {
+  if (d.emptyFlag == 1)
     return "#FF0000";
-  }
-  if (d.totalDocks === 0) { return '#000000'; }
+  if (d.totalDocks === 0)
+    return '#000000';
   return color(d.availableBikes / d.totalDocks);
 }
 
 function setStrokeWeight(avail, fullFlag, emptyFlag) {
-  if (avail === 0) { return 0; }
+  if (avail === 0)
+    return 0;
   return (fullFlag == 1 || emptyFlag == 1) ? 1.00 : 0.88;
 }
 
@@ -133,8 +138,8 @@ function circleMarker (map, d) {
   this.id = d.id;
 
   // Set the circle options
-  opts = {
     strokeColor: this.strokeColor,
+  var opts = {
     strokeOpacity: 0.85,
     strokeWeight: this.strokeWeight,
     fillColor: this.fillColor,
