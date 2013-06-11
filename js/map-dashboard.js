@@ -71,6 +71,7 @@ function getPoints (map, url) {
 function updateMarkers(url) {
   d3.json(url, function(data){
     data.forEach(function(d) {
+      if (d.statusValue == 'Planned') { return; }
       markers[d.id].update(d);
     });
   });
@@ -116,14 +117,15 @@ circleMarker.prototype = new google.maps.MVCObject();
 
 circleMarker.prototype.update = function(d) {
   this.set('radius', setRadius(d.totalDocks));
-  this.set('fillColor', color(d.availableBikes / d.totalDocks));
-  this.set('strokeColor', color(d.availableBikes / d.totalDocks));
-  this.set('strokeWeight', setStrokeWeight(d.fullFlag, d.emptyFlag));
+  this.set('fillColor', setFillColor(d));
+  this.set('strokeColor', setStrokeColor(d));
+  this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
+  this.set('content', setContent(d));
 };
 
 function circleMarker (map, d) {
   // set variables in google MVC fashion
-  this.content = setContent(d);
+  this.set('content', setContent(d));
   this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
   this.set('strokeColor', setStrokeColor(d));
   this.set('radius', setRadius(d.totalDocks));
@@ -151,6 +153,7 @@ function circleMarker (map, d) {
   this.circle.bindTo('fillColor', this);
   this.circle.bindTo('strokeWeight', this);
   this.circle.bindTo('strokeColor', this);
+  this.circle.bindTo('content', this);
 
   google.maps.event.addListener(this.circle, 'click', function(){ infoWindowOpen(this); });
 }
@@ -184,5 +187,5 @@ function bikemapinit(endpoint) {
   var bikeLayer = new google.maps.BicyclingLayer();
     bikeLayer.setMap(map);
     getPoints(map, endpoint);
-  // setInterval("updateMarkers", 6000);
+  setInterval(function() {updateMarkers(endpoint); }, 120000);
 }

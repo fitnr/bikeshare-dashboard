@@ -19,6 +19,8 @@ get_header();
 </div>
 
 <div class="row">
+	<p>Map updates every 2 minutes.</p>
+	<hr>
 	<p><a href="../bikeshare-dashboard/">⃪ System Dashboard</a></p>
 </div>
 <!-- Google Map's API -->
