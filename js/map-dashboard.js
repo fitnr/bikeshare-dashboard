@@ -123,11 +123,12 @@ circleMarker.prototype.update = function(d) {
 
 function circleMarker (map, d) {
   // set variables in google MVC fashion
-  this.set('content', setContent(d));
+  this.content = setContent(d);
   this.set('strokeWeight', setStrokeWeight(d.availableBikes, d.fullFlag, d.emptyFlag));
   this.set('strokeColor', setStrokeColor(d));
   this.set('radius', setRadius(d.totalDocks));
   this.set('fillColor', color(d.availableBikes / d.totalDocks));
+  this.set('position', new google.maps.LatLng(d.lat, d.lon));
   this.id = d.id;
   console.log(this);
 
@@ -138,7 +139,7 @@ function circleMarker (map, d) {
     fillColor: this.fillColor,
     fillOpacity: 0.69,
     map: map,
-    center: new google.maps.LatLng(d.lat, d.lon),
+    center: this.position,
     radius: this.radius,
     content: this.content // for infowindow
   };
@@ -151,13 +152,18 @@ function circleMarker (map, d) {
   circle.bindTo('strokeWeight', this);
   circle.bindTo('strokeColor', this);
   console.log(circle);
-  google.maps.event.addListener(circle, 'click', function() { infoWindowOpen(circle); });
+
+  google.maps.event.addListener(circle, 'click', function() {
+    infoWindow.setPosition(this.getCenter());
+    infoWindow.setContent(this.content);
+    infoWindow.open(map);
+  });
 }
 
-function infoWindowOpen (marker) {
-  console.log(marker);
-  infoWindow.setPosition(marker.getCenter());
-  infoWindow.setContent(marker.content);
+function infoWindowOpen (circle) {
+  console.log(circle);
+  infoWindow.setPosition(circle.getCenter());
+  infoWindow.setContent(circle.content);
   infoWindow.open(map);
 }
 
