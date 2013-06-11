@@ -14,7 +14,21 @@ get_header();
 </style>
 
 <div class="row map-container">
-	<div id="legend"></div>
+	<div id="legend">
+		<svg>
+			<g class="legend">
+				<text class="legtitle" x="0" y="11">station fullness</text>
+				<circle r="7" cx="8" cy="160" style="stroke: #ff0000;"></circle>
+				<circle r="7" cx="8" cy="180" style="stroke: #023858; "></circle>
+				<circle r="7" cx="8" cy="200" style="stroke: none; fill: #ff0000; "></circle>
+				<circle r="7" cx="8" cy="220" style="stroke: #0033dd; stroke-width: 2.25px;"></circle>
+				<text x="20" y="223">planned</text>
+				<text x="20" y="163">empty</text>
+				<text x="20" y="183">full</text>
+				<text x="20" y="203">not in service</text>				
+			</g>
+		</svg>
+	</div>
   <div id="the-map" class="gmap"></div>
 </div>
 

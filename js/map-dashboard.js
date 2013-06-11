@@ -12,52 +12,27 @@ var infoWindow,
     .domain([0, 1])
     .range(["#bcbddc","#9e9ac8","#807dba","#6a51a3","#54278f","#3f007d","#2c0057"]),
     // .range(["#67001f","#b2182b","#d6604d","#f4a582","#d1e5f0","#92c5de","#4393c3","#2166ac","#053061"]),
-  legend = d3.select("#legend").append('svg').append('g').attr('class', 'legend');
+  legend = d3.select("#legend svg g");
 
-legend
-  .append('text')
-  .text('station fullness')
-  .attr('class', 'legtitle')
-  .attr('x', 0)
-  .attr('y', 11);
+// Create data labels with arbitratry values
+[0, 0.2, 0.4, 0.6, 0.8, 0.999].forEach(function(d, i){
+  legend.append('rect')
+    .attr('class', 'full')
+    .style('fill', color(d) )
+    .style('opacity', 0.85)
+    .style('stroke', color(d) )
+    .style('stroke-opacity', 0.9)
+    .attr('x', 0)
+    .attr('y', 18 + (i * 20) )
+    .attr('width', 15)
+    .attr('height', 15);
 
-legend.selectAll('rect.full')
-  .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
-  .enter().append('rect')
-  .attr('class', 'full')
-  .style('fill', function(d){ return color(d); })
-  .style('opacity', 0.85)
-  .style('stroke', function(d){ return color(d); })
-  .style('stroke-opacity', 0.9)
-  .attr('x', 0)
-  .attr('y', function(d, i){ return 18 + (i * 20); })
-  .attr('width', 15)
-  .attr('height', 15);
-
-function circ(c) { c.attr('r', 7).attr('cx', 8); }
-
-legend.selectAll('circle')
-  .data(legendCircles)
-  .enter().append('circle')
-  .call(circ)
-  .attr('cy', function(d, i) {return (i * 20) + 160; })
-  .style('stroke', function(d) { return d.stroke; })
-  .style('fill', function(d) { return d.fill; });
-
-legend.selectAll('text.circle')
-  .data(legendCircles)
-  .enter().append('text')
-  .attr('x', 20)
-  .attr('y', function(d, i) { return (i * 20) + 163; })
-  .text(function(d){ return d.text; });
-
-legend.selectAll('text.label')
-  .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])
-  .enter().append('text')
-  .attr('class', 'label')
-  .attr('x', 20)
-  .attr('y', function(d, i){ return 30 + (i * 20); })
-  .text(function (d) { return (100 * d).toFixed(0) + '%'; });
+  legend.append('text')
+    .attr('class', 'label')
+    .attr('x', 20)
+    .attr('y', 30 + (i * 20) )
+    .text( (100 * d).toFixed(0) + '%' );
+});
 
 function getPoints (map, url) {
   d3.json(url, function(error, data) {
