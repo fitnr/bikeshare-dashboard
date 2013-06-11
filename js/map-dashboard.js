@@ -2,6 +2,11 @@
 var infoWindow,
   map,
   markers = {},
+  legendCircles = [
+    {text:'empty', 'stroke': '#ff0000', 'fill': 'none'},
+    {text:'full', 'stroke': '#023858', 'fill': 'none'},
+    {text:'not in service', 'stroke': 'none', 'fill': '#ff0000'}
+  ],
   color = d3.scale.quantize()
     .domain([0, 1])
     .range(["#bcbddc","#9e9ac8","#807dba","#6a51a3","#54278f","#3f007d","#2c0057"]),
@@ -30,31 +35,20 @@ legend.selectAll('rect.full')
 
 function circ(c) { c.attr('r', 7).attr('cx', 8); }
 
-legend
-  .append('circle')
+legend.selectAll('circle')
+  .data(legendCircles)
+  .enter().append('circle')
   .call(circ)
-  .attr('cy', 160)
-  .style('stroke', '#ff0000');
+  .attr('cy', function(d, i) {return (i * 20) + 160; })
+  .style('stroke', function(d) { return d.stroke; })
+  .style('fill', function(d) { return d.fill; });
 
-legend
-  .append('circle')
-  .call(circ)
-  .attr('cy', 180)
-  .style('stroke', '#023858');
-
-legend
-  .append('text')
-  .attr('class', 'empty')
+legend.selectAll('text.circle')
+  .data(legendCircles)
+  .enter().append('text')
   .attr('x', 20)
-  .attr('y', 162)
-  .text('empty');
-
-legend
-  .append('text')
-  .attr('class', 'full')
-  .attr('x', 20)
-  .attr('y', 182)
-  .text('full');
+  .attr('y', function(d, i) { return (i * 20) + 163; })
+  .text(function(d){ return d.text; });
 
 legend.selectAll('text.label')
   .data([0, 0.2, 0.4, 0.6, 0.8, 0.999])

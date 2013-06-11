@@ -79,7 +79,7 @@
         #legend { 
           position: absolute;
           left: 10px;
-          height: 200px;
+          height: 240px;
           width: 100px;
         }
         .legend text {
