@@ -106,6 +106,11 @@ function setContent(d) {
   return content;
 }
 
+function setFillColor(d) {
+  if (d.statusValue == 'Not In Service') return '#ff0000';
+  return color(d.availableBikes / d.totalDocks);
+}
+
 circleMarker.prototype = new google.maps.MVCObject();
 
 circleMarker.prototype.update = function(d) {
@@ -123,6 +128,7 @@ function circleMarker (map, d) {
   this.set('radius', setRadius(d.totalDocks));
   this.set('fillColor', color(d.availableBikes / d.totalDocks));
   this.set('position', new google.maps.LatLng(d.lat, d.lon));
+  this.set('fillColor', setFillColor(d));
   this.id = d.id;
   console.log(this);
 
