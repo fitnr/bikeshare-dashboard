@@ -1,7 +1,7 @@
 <?php
 /**
  * @package WordPress
- * @subpackage bikeshare
+ * @subpackage bikeshare-dashboard
  */
     ?><!DOCTYPE html>
 <!--[if lt IE 7 ]> <html <?php language_attributes(); ?> class="ie6"> <![endif]-->
@@ -22,10 +22,9 @@
 
         if (is_page_template('dashboard-station.php')):
           echo $post->stationName . ' | ';
+        else:
+          wp_title( '|', true, 'right' );
         endif;
-
-        wp_title( '|', true, 'right' );
-
         // Add the blog name.
         bloginfo( 'name' );
 

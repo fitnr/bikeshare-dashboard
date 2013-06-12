@@ -12,7 +12,7 @@ if(isset($wp_query->query_vars['station'])) {
     $station = get_station_meta($station_id);
     $since = ($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 6;
 }
-
+$post->stationName = $station->stationName;
 get_header();
 ?>
 
