@@ -40,7 +40,7 @@ get_header();
     var since = <?php echo $since; ?>,
         station_id = <?php echo $station_id; ?>;
 
-    var margin = {top: 20, right: 80, bottom: 30, left: 50},
+    var margin = {top: 20, right: 90, bottom: 30, left: 50},
         width = 1096 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
@@ -124,7 +124,7 @@ get_header();
             .style("stroke", function(d) { return color(d.name); });
 
         bike.append("text")
-            .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[d.values.length-1]}; })
+            .datum(function(d) { return {name: d.name.replace('_', ' ') + ': '+ d.values[d.values.length-1].number, value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.number) + ")"; })
             .attr("x", 3)
             .attr("dy", ".35em")
