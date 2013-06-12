@@ -55,7 +55,11 @@ function updateMarkers(url) {
   });
 }
 
-function setRadius(r) { return r * 4.05; }
+function setRadius(d) {
+  if (d.statusValue === 'Planned')
+    return 75;
+  return d.totalDocks * 4.05;
+}
 
 function setStrokeColor(d) {
   if (d.fullFlag == 1)
@@ -100,14 +104,12 @@ function setFillColor(d) {
   return color(d.availableBikes / d.totalDocks);
 }
 
-circleMarker.prototype = new google.maps.MVCObject();
-
 circleMarker.prototype.update = function(d) {
-  this.circle.set('radius', setRadius(d.totalDocks));
-  this.circle.set('fillColor', setFillColor(d));
-  this.circle.set('strokeColor', setStrokeColor(d));
-  this.circle.set('strokeWeight', setStrokeWeight(d));
-  this.circle.set('content', setContent(d));
+  this.circle.radius = setRadius(d);
+  this.circle.fillColor = setFillColor(d);
+  this.circle.strokeColor = setStrokeColor(d);
+  this.circle.strokeWeight = setStrokeWeight(d);
+  this.circle.content = setContent(d);
 };
 
 function circleMarker (map, d) {
@@ -121,7 +123,7 @@ function circleMarker (map, d) {
     map: map,
     planned: d.statusValue === 'Planned',
     center: new google.maps.LatLng(d.lat, d.lon),
-    radius: (d.statusValue === 'Planned') ? 75 : setRadius(d.totalDocks),
+    radius: setRadius(d),
     content: setContent(d) // for infowindow
   };
 
