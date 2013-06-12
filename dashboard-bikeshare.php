@@ -56,7 +56,10 @@ foreach ($active_stations as $s)
 </div>
 
 <hr>
-  <p><a href="./map/"><img <?php bloginfo('home'); echo 'images/bike-dash-map.png' ?>></a><a href="./map/">View map →</a></p>
+
+<h3>Map</h3>
+<p><a href="./map/">View map →</a></p>
+
 <hr>
 
 <h3>Station list</h3>
