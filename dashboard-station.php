@@ -9,14 +9,16 @@ global $wp_query;
 if(isset($wp_query->query_vars['station'])) {
     $station_id = $wp_query->query_vars['station'];
     // Get the station name. Station Info is called with XHR request by JS.
-    $post->stationName = get_station_name($station_id);
+    $station = get_station_meta($station_id);
     $since = ($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 6;
 }
+
+$csv_params = $station_id . '/?since=' . $since;
 
 get_header();
 ?>
 
-<h2><?php echo (isset($post->stationName)) ? $post->stationName : "Couldn't find that station"; ?></h2>
+<h2><?php echo (isset($station->stationName)) ? $station->stationName : "Couldn't find that station"; ?></h2>
 
 <p>Showing the last <?php echo pluralize($since); ?>.</p>
 
@@ -25,11 +27,12 @@ get_header();
   Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
 </form>
 
+<p>There are <?php echo $station->totalDocks; ?> docks here.</p>
 <div id="activity" class="d3-graph"></div>
 
 <p>"Null" docks aren't shown as either being filled with bikes or available.</p>
 
-<p><a href="../station_activity_csv/<?php echo $station_id . '/?since=' . $since ?>">Download data (csv)</a></p>
+<p><a href="../station_activity_csv/<?php echo $csv_params ?>">Download data (csv)</a></p>
 
 <hr>
 

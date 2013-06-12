@@ -77,11 +77,12 @@ function abstract_bikeshare_dashboard($kwargs) {
   endif;
 }
 
-function get_station_name($id) { // Internal function, not in API
+function get_station_meta($id) { // Internal function, not in API
   global $wpdb;
-   $q = "SELECT stationName from stations where id=$id";
-   $data = $wpdb->get_results($q);
-   return $data[0]->stationName;
+  $id = (int) $id;
+  $q = "SELECT s.stationName, r.totalDocks from stations s JOIN station_status r ON s.id=r.station_id where s.id=$id LIMIT 1";
+  $data = $wpdb->get_results($q);
+  return $data[0];
 }
 
 // Get overview information for the whole system
