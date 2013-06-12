@@ -6,34 +6,11 @@
 */
 get_header();
 
-function objcmp($a, $b) { return $a->diffDocks > $b->diffDocks; }
-
-function status1($x) { return ($x->status == '1'); }
-function status2($x) { return ($x->status == '2'); }
-function status3($x) { return ($x->status == '3'); }
-
-function top_stations($data, $line='%s (%s, %s)') {
-    $output = '';
-    foreach ($data as $value):
-        if ($value->diffDocks > 0):
-            $format = $line;
-        else:
-            $format = '<span class="badge badge-important">' . $line . '</span>';
-        endif;
-
-        $format = '<a href="%s/station-dashboard/?station=%s">'. $format .'</a>';
-
-        $output .= '<li>' . sprintf($format, get_bloginfo('home'), $value->id, $value->stationName, $value->maxDocks, $value->minDocks) . '</li>';
-
-    endforeach;
-    return $output;
-}
-
 global $wpdb;
 
 $kwargs = station_overview();
 $station_data = $wpdb->get_results(sprintf($kwargs['q'], $kwargs['since']));
-usort($station_data, 'objcmp');
+usort($station_data, 'diffockcmp');
 $since = (int) $kwargs['since'];
 
 // Get status of stations
@@ -57,20 +34,26 @@ foreach ($active_stations as $s)
   Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
 </form>
 
+<!-- Overview charts -->
 <div class="row">
 
   <div class="span3">
     <h3>Docks and bikes</h3>
-      <div id="overview" class="d3-graph"></div>
+
+    <div id="overview" class="d3-graph"></div>
+
+    <p><small>"Null" docks aren't shown as either being filled with bikes or available.</small></p>
+
+    <p><a href="./system_activity_csv/<?php echo "?since=".$since ;?>">Download data (csv)</a></p>
+
   </div>
+
   <div class="span3">
     <h3>Stations</h3>
-
     <div id="fullempty" class="d3-graph"></div>
   </div>
-</div>
 
-<p><a href="./system_activity_csv/<?php echo "?since=".$since ;?>">Download data (csv)</a></p>
+</div>
 
 <hr>
   <p><a href="./map/">View map →</a></p>
@@ -83,7 +66,6 @@ foreach ($active_stations as $s)
   <li><?php echo $station_status['3']?> stations have been listed as <a href="#inactive">not in service</a>.</li>
   <li><?php echo $station_status['2']?> stations have been listed as <a href="#planned">planned</a>.</li>
   <li><?php echo $station_status['1']?> stations have been <a href="#active">active</a>.</li>
-  
 </ul>
 
 <p>The maximum and minimum number of available docks in the last <?php echo pluralize($since); ?> are shown in parentheses.</p>
@@ -92,19 +74,21 @@ foreach ($active_stations as $s)
 <h4 id="inactive">Not In Service</h4>
 
 <ul class="cols-three">
-    <?php echo top_stations(array_filter($station_data, 'status3')) ?>
+<?php echo station_list(array_filter($station_data, 'status3')) ?>
 </ul>
 
 <h4 id="active">Active Stations</h4>
 
+<p>Stations with no activity in the last <?php echo pluralize($since); ?>: <span class="label label-important"><?php echo $count_no_active; ?></span></p>
+
 <ul class="cols-three">
-    <?php echo top_stations(array_filter($station_data, 'status1')) ?>
+<?php echo station_list($active_stations); ?>
 </ul>
 
 <h4 id="planned">Planned Stations</h4>
 
 <ul class="cols-three">
-    <?php echo top_stations(array_filter($station_data, 'status2')) ?>
+<?php echo station_list(array_filter($station_data, 'status2')) ?>
 </ul>
 
 

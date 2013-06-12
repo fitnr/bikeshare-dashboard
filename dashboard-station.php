@@ -13,8 +13,6 @@ if(isset($wp_query->query_vars['station'])) {
     $since = ($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 6;
 }
 
-$csv_params = $station_id . '/?since=' . $since;
-
 get_header();
 ?>
 
@@ -32,7 +30,7 @@ get_header();
 
 <p>"Null" docks aren't shown as either being filled with bikes or available.</p>
 
-<p><a href="../station_activity_csv/<?php echo $csv_params ?>">Download data (csv)</a></p>
+<p><a href="../station_activity_csv/<?php echo $station_id . '/?since=' . $since; ?>">Download data (csv)</a></p>
 
 <hr>
 
