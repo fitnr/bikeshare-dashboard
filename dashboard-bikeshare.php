@@ -201,7 +201,7 @@ foreach ($active_stations as $s)
             .style("stroke", function(d) { return color(d.name); });
 
         bike1.append("text")
-            .datum(function(d) { return {name: d.name.replace('_',  ' '), value: d.values[d.values.length-1]}; })
+            .datum(function(d) { return {name: d.name.replace('_',  ' ') +': '+ d.values[d.values.length-1].number, value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
             .attr("x", -70)
             .attr("dy", "-0.33em")
@@ -240,7 +240,7 @@ foreach ($active_stations as $s)
             .style("stroke", function(d) { return color(d.name); });
 
         bike2.append("text")
-            .datum(function(d) { return {name: d.name.replace('_', ' '), value: d.values[d.values.length-1]}; })
+            .datum(function(d) { return {name: d.name.replace('_', ' ') + ': ' + d.values[d.values.length-1].number, value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y1(d.value.number) + ")"; })
             .attr("x", 2)
             .attr("dy", "0.35em")
