@@ -79,7 +79,7 @@
         #legend { 
           position: absolute;
           left: 69px;
-          height: 211px;
+          height: 231px;
           width: 83px;
           z-index: 10;
           background-color: white;
