@@ -41,6 +41,14 @@ $station_status = array('1'=>0, '2'=>0, '3'=>0);
 foreach($station_data as $stn)
   $station_status[$stn->status]++;
 
+// Get number of active stations without activity lately
+$active_stations = array_filter($station_data, 'status1');
+
+// Amazingly, this is faster than doing array_filter
+$count_no_active = 0;
+foreach ($active_stations as $s)
+  $count_no_active += ($s->diffDocks <= 0) ? 1 : 0;
+
 ?>
 
 <h1>Activity overview for last <?php echo pluralize($since); ?></h1>
@@ -79,7 +87,7 @@ foreach($station_data as $stn)
 </ul>
 
 <p>The maximum and minimum number of available docks in the last <?php echo pluralize($since); ?> are shown in parentheses.</p>
-<p><span class="label label-important">Red</span> stations have no activity in the last <?php echo pluralize($since); ?>.</p>
+<p><span class="label label-important">Red</span> stations have no recorded activity in the last <?php echo pluralize($since); ?>.</p>
 
 <h4 id="inactive">Not In Service</h4>
 
