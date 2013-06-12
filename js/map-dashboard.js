@@ -84,7 +84,7 @@ function setContent(d) {
         ( d.statusValue == 'Planned' ) ? '<br>Planned station' : ''
       ),
       content =
-      '<h5><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h5>' +
+      '<h5 class="infowindow"><a href="../station-dashboard/?station=' + d.id + '">' + d.stationName + '</a></h5>' +
       '<p class="infowindow"><small>Available docks: ' + d.availableDocks + '<br>'+
       'Available bikes: ' + d.availableBikes + '<br>'+
       'Total docks: ' + d.totalDocks +
@@ -149,14 +149,17 @@ function bikemapinit(endpoint) {
       mapTypeId: google.maps.MapTypeId.ROADMAP,
       scrollwheel: true,
       maxZoom: 18,
-      minZoom: 12
+      minZoom: 11
     };
   infoWindow = new google.maps.InfoWindow({
       content: "",
-      disableAutoPan: false,
       zIndex: null
   });
   map = new google.maps.Map(document.getElementById("the-map"), options);
+
+  // Close infowindow when clicking away
+  google.maps.event.addListener(map, 'click', function(){ infoWindow.close(); });
+
   var bikeLayer = new google.maps.BicyclingLayer();
     bikeLayer.setMap(map);
     getPoints(map, endpoint);

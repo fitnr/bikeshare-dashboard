@@ -101,8 +101,11 @@
         }
         /* fix for bootstrap/gmap style conflict */
         .gmap img { max-width: none; }
-
+        
         .infowindow {
+          margin: 0;
+        }
+        p.infowindow {
           line-height: 1.1em;
         }
 
