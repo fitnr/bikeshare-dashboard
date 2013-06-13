@@ -220,6 +220,8 @@ function insert_row($row, $pdo) {
 }
 
 function insert_station($row, $pdo) {
+  global $queries, $param_keys;
+
   // Fiddle with the data
   $row['altitude'] = ($row['altitude'] === '' || $row['altitude'] === NULL) ? '' : $row['altitude'];
 
