@@ -34,11 +34,31 @@ var infoWindow,
     .text( (100 * d).toFixed(0) + '%' );
 });
 
+function getQueryParams(qs) {
+  "use strict";
+  var params = {},
+    tokens,
+    re = /[?&]?([^=]+)=([^&]*)/g;
+  qs = qs.split("+").join(" ");
+  while ((tokens = re.exec(qs))) {
+      params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+  }
+  return params;
+}
+
 function getPoints (map, url) {
+  var query = getQueryParams(document.location.search),
+    station = (query.hasOwnProperty('station')) ? query['station'] : null;
+
   d3.json(url, function(error, data) {
     data.forEach(function(d){
       marker = new circleMarker(map, d);
       markers[d.id] = marker;
+
+      // Open window for queried station. Rely on JS matching 72 and "72"
+      if (d.id == station)
+        infoWindowOpen(marker.circle);
+
     });
   });
 }
@@ -163,7 +183,7 @@ function bikemapinit(endpoint) {
   google.maps.event.addListener(map, 'click', function(){ infoWindow.close(); });
 
   var bikeLayer = new google.maps.BicyclingLayer();
-    bikeLayer.setMap(map);
-    getPoints(map, endpoint);
+  bikeLayer.setMap(map);
+  getPoints(map, endpoint);
   setInterval(function() {updateMarkers(endpoint); }, 120000);
 }
