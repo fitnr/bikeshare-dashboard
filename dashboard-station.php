@@ -28,6 +28,7 @@ get_header();
 <p>There are <?php echo $station->totalDocks; ?> docks here.</p>
 <div id="activity" class="d3-graph"></div>
 
+<p><a href="../map/?station=<?php echo $station_id ?>">View on map</a></p>
 <p>"Null" docks aren't shown as either being filled with bikes or available.</p>
 
 <p><a href="../station_activity_csv/<?php echo $station_id . '/?since=' . $since; ?>">Download data (csv)</a></p>
