@@ -51,6 +51,7 @@
           -webkit-columns:100px 3; /* Safari and Chrome */
           -moz-columns:100px 3; /* Firefox */
         }
+        /* d3 charts */
         .d3-graph {
           font-size: 10px;
         }
@@ -75,39 +76,6 @@
           stroke: steelblue;
           stroke-width: 3px;
         }
-        #legend { 
-          position: absolute;
-          left: 69px;
-          height: 231px;
-          width: 83px;
-          z-index: 10;
-          background-color: white;
-          padding: 10px;
-          bottom: 37px;
-        }
-        .legend text {
-          font: 10px sans-serif;
-        }
-        .legend .legtitle {
-          font: 12px sans-serif;
-        }
-        .legend circle {
-          stroke-width: 1.25px;
-          fill: transparent;
-        }
-        .legend rect.full {
-          stroke-width: 0.88px;
-        }
-        /* fix for bootstrap/gmap style conflict */
-        .gmap img { max-width: none; }
-        
-        .infowindow {
-          margin: 0;
-        }
-        p.infowindow {
-          line-height: 1.1em;
-        }
-
     </style>
 
   <?php wp_head(); ?>

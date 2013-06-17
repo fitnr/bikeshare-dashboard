@@ -9,8 +9,44 @@ get_header();
 <style>
   /* gmap rules */
   html, body, .container { height: 100%; }
-  .map-container { height: 95%;}
+  .map-container { height: 95%; position: relative;}
   #the-map { width:100%; height: 100%;}
+
+  /* legend */
+  #legend { 
+    position: absolute;
+    right: 0;
+    height: 231px;
+    width: 83px;
+    z-index: 10;
+    background-color: rgba(256,256,256,.8);
+    padding: 10px;
+    top: 0;
+  }
+  .legend text {
+    font: 10px sans-serif;
+  }
+  .legend .legtitle {
+    font: 12px sans-serif;
+  }
+  .legend circle {
+    stroke-width: 1.25px;
+    fill: transparent;
+  }
+  .legend rect.full {
+    stroke-width: 0.88px;
+  }
+  /* fix for bootstrap/gmap style conflict */
+  .gmap img { max-width: none; }
+  
+  .infowindow {
+    margin: 0;
+  }
+  p.infowindow {
+    line-height: 1.1em;
+  }
+
+
 </style>
 
 <div class="row map-container">
