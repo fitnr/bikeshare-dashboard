@@ -20,6 +20,8 @@ foreach($station_data as $stn)
 
 // Get number of active stations without activity lately
 $active_stations = array_filter($station_data, 'status1');
+$inactive_stations = array_filter($station_data, 'status3');
+$planned_stations = array_filter($station_data, 'status2');
 
 // Amazingly, this is faster than doing array_filter
 $count_no_active = 0;
@@ -74,26 +76,32 @@ foreach ($active_stations as $s)
 <p>The maximum and minimum number of available docks in the last <?php echo pluralize($since); ?> are shown in parentheses.</p>
 <p><span class="label label-important">Red</span> stations have no recorded activity in the last <?php echo pluralize($since); ?>.</p>
 
+<?php if (count($inactive_stations) > 0): ?>
+
 <h4 id="inactive">Not In Service</h4>
 
 <ul class="cols-three">
-<?php echo station_list(array_filter($station_data, 'status3')) ?>
+<?php echo station_list($inactive_stations); ?>
 </ul>
+
+<?php endif; ?>
 
 <h4 id="active">Active Stations</h4>
 
 <p>Stations with no activity in the last <?php echo pluralize($since); ?>: <span class="label label-important"><?php echo $count_no_active; ?></span></p>
 
-<ul class="cols-three">
+<ul class="station-list cols-three">
 <?php echo station_list($active_stations); ?>
 </ul>
 
+<?php if (count($planned_stations) > 0): ?>
 <h4 id="planned">Planned Stations</h4>
 
-<ul class="cols-three">
-<?php echo station_list(array_filter($station_data, 'status2')) ?>
+<ul class="station-list cols-three">
+<?php echo station_list($planned_stations); ?>
 </ul>
 
+<?php endif; ?>
 
 <script>
     var since = <?php echo $kwargs['since'] ;?>;
