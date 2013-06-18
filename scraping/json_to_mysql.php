@@ -223,7 +223,7 @@ function insert_station($row, $pdo) {
   global $queries, $param_keys;
 
   // Fiddle with the data
-  $row['altitude'] = ($row['altitude'] === '' ) ? NULL : $row['altitude'];
+  $row['altitude'] = ($row['altitude'] === '' ) ? 0 : $row['altitude'];
 
   $station_data = array_intersect_key($row, $param_keys['insert_station_keys']);
   try {
