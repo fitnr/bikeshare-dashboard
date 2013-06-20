@@ -88,7 +88,7 @@ function station_queryvars($qvars) {
 function abstract_bikeshare_dashboard($kwargs) {
   global $wpdb;
 
-  $data = $wpdb->get_results(sprintf($kwargs['q'], $kwargs['since'], $kwargs['filter']));
+  $data = $wpdb->get_results($wpdb->prepare($kwargs['q'], $kwargs['since'], $kwargs['filter']));
   if ($kwargs['output']=='csv'):
     return output_csv($kwargs['fileName'], $data);
   else:
@@ -98,9 +98,7 @@ function abstract_bikeshare_dashboard($kwargs) {
 
 function get_station_meta($id) { // Internal function, not in API
   global $wpdb;
-  $id = (int) $id;
-  $q = "SELECT s.stationName, r.totalDocks from stations s JOIN station_status r ON s.id=r.station_id where s.id=$id LIMIT 1";
-  $data = $wpdb->get_results($q);
+  $data = $wpdb->get_results($wpdb->prepare("SELECT s.stationName, r.totalDocks from stations s JOIN station_status r ON s.id=r.station_id where s.id=%d LIMIT 1", $id));
   return $data[0];
 }
 
@@ -146,17 +144,17 @@ function station_activity($station_id, $output='json', $since=6) {
     $filter = "AND MINUTE(`stamp`) % 3 = 0"; // Get records from every third minute
   }
 
-  $j = "SELECT `id`, `stationName` FROM stations y WHERE `id`=%d";
+  $j = "SELECT `stationName` FROM stations y WHERE `id`=%d";
 
-  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes, (totalDocks - availableDocks - availableBikes) Null_Docks FROM station_status WHERE station_id=%d and (stamp > NOW() - INTERVAL %d HOUR) %s ORDER BY stamp ASC;";
+  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes, (totalDocks - availableDocks - availableBikes) Null_Docks FROM station_status WHERE station_id=%d and (stamp > NOW() - INTERVAL %d HOUR) ". $filter ." ORDER BY stamp ASC;";
 
-  $data = $wpdb->get_results(sprintf($q, $station_id, $since, $filter));
-  $hed = $wpdb->get_results(sprintf($j, $station_id));
+  $data = $wpdb->get_results($wpdb->prepare($q, $station_id, $since, $filter));
+  $stationName = $wpdb->get_var($wpdb->prepare($j, $station_id));
 
   if ($output=='csv'):
-    return output_csv($hed[0]->stationName, $data);
+    return output_csv($stationName, $data);
   else:
-    return json_encode(array("stationInfo"=>$hed[0], "activity"=>$data, 'query'=>sprintf($q, $station_id, $since, $filter)));
+    return json_encode(array("stationInfo"=>$sincetationName, "activity"=>$data, 'query'=>sprintf($q, $station_id, $since, $filter)));
   endif;
 }
 
