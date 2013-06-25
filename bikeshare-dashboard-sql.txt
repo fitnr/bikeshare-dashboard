@@ -63,7 +63,8 @@ DROP TABLE IF EXISTS `station_status`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `station_status` (
   `id` bigint(20) unsigned NOT NULL auto_increment,
-  `station_id` int(11) NOT NULL,
+  `station_id` int(11) default NULL,
+  `llid` bigint(11) unsigned default NULL,
   `availableDocks` smallint(5) unsigned default NULL,
   `totalDocks` smallint(5) unsigned default NULL,
   `statusValue` varchar(128) default NULL,
@@ -72,9 +73,9 @@ CREATE TABLE `station_status` (
   `lastCommunicationTime` datetime default NULL,
   `stamp` datetime default NULL,
   PRIMARY KEY  (`id`),
-  KEY `stnid` (`station_id`),
+  KEY `ll`  (`llid`),
   KEY `stmp` (`stamp`)
-) ENGINE=InnoDB AUTO_INCREMENT=2965358 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -86,6 +87,7 @@ DROP TABLE IF EXISTS `stations`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `stations` (
   `id` int(10) unsigned NOT NULL,
+  `llid` bigint(11) unsigned NOT NULL default '0',
   `stationName` varchar(128) default NULL,
   `latitude` double(10,8) default NULL,
   `longitude` double(10,8) default NULL,
@@ -97,7 +99,9 @@ CREATE TABLE `stations` (
   `altitude` int(11) default NULL,
   `landMark` varchar(128) default NULL,
   `communityboard` smallint(3) unsigned default NULL,
-  KEY `stn_id` (`id`)
+  `council` int(2) default NULL,
+  `inserted` timestamp NULL default CURRENT_TIMESTAMP,
+  PRIMARY KEY (`llid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

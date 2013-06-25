@@ -47,8 +47,8 @@
 
 /* constants*/
 $queries = array(
-  "INSERT_ROW" => 'INSERT INTO station_status (station_id, availableDocks, totalDocks, statusValue, statusKey, availableBikes, lastCommunicationTime, stamp) VALUES (:id, :availableDocks, :totalDocks, :statusValue, :statusKey, :availableBikes, :lastCommunicationTime, :stamp)',
-  "INSERT_STATION" => 'INSERT INTO stations (id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark) VALUES (:id, :stationName, :latitude, :longitude, :stAddress1, :stAddress2, :city, :postalCode, :location, :altitude, :landMark)',
+  "INSERT_ROW" => 'INSERT INTO station_status (llid, availableDocks, totalDocks, statusValue, statusKey, availableBikes, lastCommunicationTime, stamp) VALUES (:llid, :availableDocks, :totalDocks, :statusValue, :statusKey, :availableBikes, :lastCommunicationTime, :stamp)',
+  "INSERT_STATION" => 'INSERT INTO stations (llid, id, stationName, latitude, longitude, stAddress1, stAddress2, city, postalCode, location, altitude, landMark, inserted) VALUES (:llid, :id, :stationName, :latitude, :longitude, :stAddress1, :stAddress2, :city, :postalCode, :location, :altitude, :landMark, :stamp)',
   // 1 is the geoid for all of NYC
   "INSERT_STATUS" => "INSERT INTO status_report
   (stamp, geo_id, availBikes, availDocks, nullDocks, totalDocks, fullStations, emptyStations, plannedStations, inactiveStations)
@@ -68,7 +68,7 @@ $queries = array(
 $param_keys = array(
 
   'insert_row_keys' => array(
-    "id" => NULL,
+    "llid" => NULL,
     "availableDocks" => NULL,
     "totalDocks" => NULL,
     "statusValue" => NULL,
@@ -80,6 +80,7 @@ $param_keys = array(
 
   'insert_station_keys' => array(
     "id" => NULL,
+    "llid" => NULL,
     "stationName" => NULL,
     "latitude" => NULL,
     "longitude" => NULL,
@@ -89,6 +90,7 @@ $param_keys = array(
     "postalCode" => NULL,
     "location" => NULL,
     "altitude" => NULL,
+    "stamp" => NULL,
     "landMark" => NULL
   )
   );
@@ -101,7 +103,7 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
     $data = open_file($f);
     list($stats, $timestamp) = parse_data($data);
   } catch (Exception $e) {
-    echo $e->getMessage() ."\n";
+    echo $e->getMessage() .' '. $f . " \n";
     return;
   }
 
@@ -116,7 +118,7 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
   // Check if this timestamp has been added already
   $result_count = count_timestamp($timestamp, $pdo);
   if ($result_count > 0):
-    echo 'Skipping '. $timestamp .', seen it before. Found in '. $f ."\n";
+    // echo 'Skipping '. $timestamp .', seen it before. Found in '. $f ."\n";
     return;
   endif;
 
@@ -128,12 +130,16 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
   foreach ($stats as $row):
     $row = (array) $row;
     $row['stamp'] = $timestamp;
+    $row['llid'] = strval(round($row['latitude'] * 1000)) . strval(round($row['longitude'] * -1000));
+
     insert_row($row, $pdo);
 
     // Check if that station is in the stations table
-    if (!in_array($row['id'], $station_ids))
+    if (!in_array($row['llid'], $station_ids)):
+      print "Inserting " . $row['stationName'] .' '. $row['llid'] . " \n";
       insert_station($row, $pdo);
-
+      $station_ids[] = $row['llid'];
+    endif;
   endforeach;
 
   // create a new row in the status table
@@ -160,7 +166,7 @@ function parse_data($data) {
     $d = new DateTime($data['executionTime']);
     $timestamp = $d->format('Y-m-d H:i:s');
   else:
-    throw new Exception("Missing or badly formatted data in " . $f, 1);
+    throw new Exception("Missing or badly formatted data", 1);
   endif;
 
   return array($stats, $timestamp);
@@ -183,7 +189,7 @@ function get_station_ids($pdo) {
   $station_ids = array();
 
   try {
-    $select_stn = $pdo->prepare("SELECT id FROM stations");
+    $select_stn = $pdo->prepare("SELECT llid FROM stations");
     $select_stn->execute();
     $select_stn->setFetchMode(PDO::FETCH_ASSOC);
     $result_stations = $select_stn->fetchAll();
@@ -191,7 +197,7 @@ function get_station_ids($pdo) {
     print $e->getMessage() ."\n";
   }
   foreach ($result_stations as $stn)
-    $station_ids[] = $stn['id'];
+    $station_ids[] = $stn['llid'];
 
   return $station_ids;
 }
@@ -232,8 +238,8 @@ function insert_station($row, $pdo) {
     // echo 'inserted station '. $row['id'];
   } catch (PDOException $e) {
     echo $e->getMessage() . "\n";
-    echo 'problem inserting station '. $station_data['id'] ."\n";
-    echo $insert_stn->queryString;
+    echo $statio_data['stamp'] . ': Problem inserting station id:' . $station_data['id'] .', llid:'. $station_data['llid'] . "\n";
+    // echo $insert_stn->queryString . "\n";
     // echo $insert_stn->debugDumpParams();
     // echo 'stn data ' . count($station_data) . "\n";
     // echo 'station  ' .count($insert_station_keys) . "\n";
