@@ -41,7 +41,7 @@ get_header();
     var since = <?php echo $since; ?>,
         station_id = <?php echo $station_id; ?>;
 
-    var margin = {top: 20, right: 90, bottom: 30, left: 50},
+    var margin = {top: 20, right: 92, bottom: 30, left: 50},
         width = 1096 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
@@ -127,7 +127,7 @@ get_header();
         bike.append("text")
             .datum(function(d) { return {name: d.name.replace('_', ' ') + ': '+ d.values[d.values.length-1].number, value: d.values[d.values.length-1]}; })
             .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.number) + ")"; })
-            .attr("x", 3)
+            .attr("x", 1)
             .attr("dy", ".35em")
             .text(function(d) { return d.name; });
       });
