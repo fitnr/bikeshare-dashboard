@@ -10,13 +10,13 @@ if(isset($wp_query->query_vars['station'])) {
     $station_id = $wp_query->query_vars['station'];
     // Get the station name. Station Info is called with XHR request by JS.
     $station = get_station_meta($station_id);
-    $since = ($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 6;
+    $since = ($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 3;
 }
-$post->stationName = $station->stationName;
+$post->stationName = (isset($station->stationName)) ? $station->stationName : "Couldn't find that station";
 get_header();
 ?>
 
-<h2><?php echo (isset($station->stationName)) ? $station->stationName : "Couldn't find that station"; ?></h2>
+<h2><?php echo $post->stationName; ?></h2>
 
 <p>Showing the last <?php echo pluralize($since); ?>.</p>
 
