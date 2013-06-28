@@ -98,8 +98,11 @@ function abstract_bikeshare_dashboard($kwargs) {
 
 function get_station_meta($id) { // Internal function, not in API
   global $wpdb;
-  $data = $wpdb->get_results($wpdb->prepare("SELECT s.stationName, r.totalDocks from stations s JOIN station_status r ON s.llid=r.llid where s.llid=%d LIMIT 1", $id));
-  return $data[0];
+  // cast is workaround for 32 bit systems that can't handle BIG OL' integers.
+  $sql = $wpdb->prepare("SELECT s.stationName, r.totalDocks from stations s JOIN station_status r ON s.llid=r.llid where s.llid = CAST(%s AS UNSIGNED INTEGER) LIMIT 1", $id);
+  $data = $wpdb->get_row($sql);
+  $data->sql = $sql;
+  return $data;
 }
 
 // Get overview information for the whole system
@@ -144,9 +147,12 @@ function station_activity($llid, $output='json', $since=6) {
     $filter = "AND MINUTE(`stamp`) % 3 = 0"; // Get records from every third minute
   }
 
-  $j = "SELECT `stationName` FROM stations y WHERE `llid`=%d";
+  // cast is workaround for 32 bit systems that can't handle BIG OL' integers.
+  $j = "SELECT y.stationName FROM stations y WHERE y.llid=CAST(%s AS UNSIGNED INTEGER)";
 
-  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes, (totalDocks - availableDocks - availableBikes) Null_Docks FROM station_status WHERE llid=%d and (stamp > NOW() - INTERVAL %d HOUR) ". $filter ." ORDER BY stamp ASC;";
+  $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes, (totalDocks - availableDocks - availableBikes) Null_Docks
+    FROM station_status WHERE llid=CAST(%s AS UNSIGNED INTEGER)
+    AND (stamp > NOW() - INTERVAL %d HOUR) ". $filter ." ORDER BY stamp ASC;";
 
   $data = $wpdb->get_results($wpdb->prepare($q, $llid, $since, $filter));
   $stationName = $wpdb->get_var($wpdb->prepare($j, $llid));
@@ -154,13 +160,13 @@ function station_activity($llid, $output='json', $since=6) {
   if ($output=='csv'):
     return output_csv($stationName, $data);
   else:
-    return json_encode(array("stationInfo"=>$stationName, "activity"=>$data));
+    return json_encode(array("activity"=>$data));
   endif;
 }
 
 function station_locations(){
   global $wpdb;
-  $data = $wpdb->get_results("SELECT x.llid, x.stationName, x.latitude lat, x.longitude lon, y.availableDocks, y.availableBikes, y.totalDocks, IF(statusKey=1 AND availableDocks=0,1,0) fullFlag, IF(statusKey=1 AND availableBikes=0,1,0) emptyFlag, statusValue FROM stations x INNER JOIN station_status y ON (x.llid=y.llid) WHERE y.stamp = (SELECT MAX(stamp) FROM station_status);");
+  $data = $wpdb->get_results("SELECT x.llid id, x.stationName, x.latitude lat, x.longitude lon, y.availableDocks, y.availableBikes, y.totalDocks, IF(statusKey=1 AND availableDocks=0,1,0) fullFlag, IF(statusKey=1 AND availableBikes=0,1,0) emptyFlag, statusValue FROM stations x INNER JOIN station_status y ON (x.llid=y.llid) WHERE y.stamp = (SELECT MAX(stamp) FROM station_status);");
   return json_encode($data);
 }
 
