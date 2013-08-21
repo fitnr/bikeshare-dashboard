@@ -93,8 +93,7 @@ function station_queryvars($qvars) {
 
 function abstract_bikeshare_dashboard($kwargs) {
   global $wpdb;
-
-  $data = $wpdb->get_results($wpdb->prepare($kwargs['q'], $kwargs['since'], $kwargs['filter']));
+  $data = $wpdb->get_results($wpdb->prepare($kwargs['q'], $kwargs['since']));
   if ($kwargs['output']=='csv'):
     return output_csv($kwargs['fileName'], $data);
   else:
@@ -121,7 +120,7 @@ function get_overview_data($since=6) {
   endif;
 
   $q = "SELECT s.stamp datetime, s.totalDocks Total_Docks, s.availDocks Available_Docks, s.availBikes Available_Bikes, s.nullDocks Null_Docks, s.fullStations Full_Stations, s.plannedStations Planned_Stations, s.emptyStations Empty_Stations, s.inactiveStations Inactive_Stations FROM status_report s WHERE (s.stamp > NOW() - INTERVAL %d HOUR) ORDER BY s.stamp ASC;";
-  return array('q'=>$q, 'since'=>$since, 'fileName'=>'overview-' . date('Y-m-d'));
+  return array('q'=>$q, 'since'=>$since, 'filename'=>'overview-' . date('Y-m-d'), 'output'=>'json');
 }
 
 // Get day-by-day average data for this station over the last interval.
