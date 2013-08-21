@@ -147,7 +147,7 @@ foreach ($active_stations as $s)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    d3.json("<?php bloginfo('home'); ?>/system_activity/?since=" + since, function(error, data){
+    d3.json("<?php bloginfo('url'); ?>/system_activity/?since=" + since, function(error, data){
 
       data.forEach(function(d) {
           d.stamp = parseDate(d.datetime);
