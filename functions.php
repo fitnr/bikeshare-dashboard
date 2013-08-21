@@ -63,6 +63,12 @@ function dashboard_request() {
     header("Expires: 0");
     echo $output['csv'];
     exit;
+
+  } else if (preg_match(',/station_pattern/(\d+)/,', $_SERVER['REQUEST_URI'], $matches)) {
+    header("HTTP/1.0 200 OK");
+    echo get_station_pattern($matches[1]);
+    exit;
+
   } else if (preg_match(',/get_station_locations$,', $_SERVER['REQUEST_URI'])) {
     header("HTTP/1.0 200 OK");
     echo station_locations();
@@ -118,6 +124,20 @@ function get_overview_data($since=6) {
   return array('q'=>$q, 'since'=>$since, 'fileName'=>'overview-' . date('Y-m-d'));
 }
 
+// Get day-by-day average data for this station over the last interval.
+// Since is in Days
+function get_station_pattern($llid, $ouput='json', $since=28) {
+  global $wpdb;
+  $d = new DateTime();
+  // Subtract days from the current date to get the most recent Sunday
+  $d = $d->modify('-' . $d->format('w') .' day');
+  $recentSunday = $d->format('Y-m-j');
+  $q = "SELECT CONCAT(DATE_SUB(%s, INTERVAL WEEKDAY(s.stamp) DAY), ' ', LPAD(HOUR(s.stamp), 2, '0'), ':', LPAD(FLOOR(MINUTE(s.stamp)/30)*30, 2, '0')) datetime, ROUND(AVG(s.availableDocks), 2) avgDocks, ROUND(AVG(s.availableBikes), 2) avgBikes, ROUND(AVG(s.totalDocks - s.availableBikes - s.availableDocks), 2) avgNullDocks FROM station_status s WHERE s.llid=%d AND (s.stamp > NOW() - INTERVAL %d DAY) GROUP BY datetime;";
+  $data = $wpdb->get_results($wpdb->prepare($q, $recentSunday, $llid, $since));
+  return json_encode($data);
+}
+
+
 // Get information about the status of each station in the system
 function station_overview($since=1) {
   // $since is in hours
@@ -133,8 +153,7 @@ function station_overview($since=1) {
 // The status of a particular station over time.
 function station_activity($llid, $output='json', $since=6) {
   // since is in hours
-  global $wpdb;
-  global $wp_query;
+  global $wpdb, $wp_query;
   if (isset($wp_query->query_vars['since'])):
      $since = $wp_query->query_vars['since'];
   endif;
@@ -226,7 +245,7 @@ function station_list($data, $line='%s (%s, %s)', $link='/station-dashboard/?sta
 
         $format = '<a href="%s'. $link .'%s">'. $format .'</a>';
 
-        $output .= "  <li>". sprintf($format, get_bloginfo('home'), $value->id, $value->stationName, $value->maxDocks, $value->minDocks) ."</li>\n";
+        $output .= "  <li>". sprintf($format, get_bloginfo('url'), $value->id, $value->stationName, $value->maxDocks, $value->minDocks) ."</li>\n";
 
     endforeach;
     return $output;
