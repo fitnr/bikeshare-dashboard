@@ -54,6 +54,11 @@ function dashboard_request() {
     echo station_activity($matches[1]);
     exit;
 
+  } elseif (preg_match('-/station_trips/(\d+)/-', $_SERVER['REQUEST_URI'], $matches)) {
+    header("HTTP/1.0 200 OK");
+    echo station_trips($matches[1]);
+    exit;
+
   } elseif (preg_match('-/station_activity_csv/(\d+)/-', $_SERVER['REQUEST_URI'], $matches)) {
     $output = station_activity($matches[1], 'csv');
     header("HTTP/1.0 200 OK");
@@ -76,20 +81,14 @@ function dashboard_request() {
   }
 }
 
-// add since to the query vars
-add_filter('query_vars', 'since_queryvars');
-
-function since_queryvars($qvars) {
-  $qvars[] = 'since';
-  return $qvars;
-}
-
-add_filter('query_vars', 'station_queryvars');
-
-function station_queryvars($qvars) {
+// add to the query vars
+function bd_queryvars($qvars) {
+  $qvars[] = 'starttime';
+  $qvars[] = 'endtime';
   $qvars[] = 'station';
   return $qvars;
 }
+add_filter('query_vars', 'bd_queryvars');
 
 function abstract_bikeshare_dashboard($kwargs) {
   global $wpdb;
@@ -136,49 +135,121 @@ function get_station_pattern($llid, $ouput='json', $since=28) {
   return json_encode($data);
 }
 
-
 // Get information about the status of each station in the system
 function station_overview($since=1) {
   // $since is in hours
   global $wp_query;
   if(isset($wp_query->query_vars['since'])):
-     $since = $wp_query->query_vars['since'];
+    $since = $wp_query->query_vars['since'];
   endif;
 
   $q = "SELECT MIN(x.availableDocks) minDocks, MAX(x.availableDocks) maxDocks, MAX(x.availableDocks)-MIN(x.availableDocks) diffDocks, MAX(x.statusKey) status, x.llid id, y.stationName FROM station_status x JOIN stations y ON x.llid = y.llid WHERE (x.stamp > NOW() - INTERVAL %d HOUR) GROUP BY x.llid";
   return array('q'=>$q, 'since'=>$since);
 }
 
-// The status of a particular station over time.
-function station_activity($llid, $output='json', $since=6) {
-  // since is in hours
-  global $wpdb, $wp_query;
-  if (isset($wp_query->query_vars['since'])):
-     $since = $wp_query->query_vars['since'];
-  endif;
-
-  $filter = '';
-  if ($since>24) {
-    $filter = "AND MINUTE(`stamp`) % 2 = 0"; // Get records from only even minutes
-  }
-  if ($since>72) {
-    $filter = "AND MINUTE(`stamp`) % 3 = 0"; // Get records from every third minute
-  }
-
+function get_stationname($llid) {
   // cast is workaround for 32 bit systems that can't handle BIG OL' integers.
   $j = "SELECT y.stationName FROM stations y WHERE y.llid=CAST(%s AS UNSIGNED INTEGER)";
+  return $wpdb->get_var($wpdb->prepare($j, $llid));
+}
+
+// The status of a particular station over time.
+function station_activity($llid, $output='json') {
+  global $wpdb;
+
+  list($interval_end, $interval_length) = prepare_startstop_intervals();
+
+  $filter = '';
+  if ($interval_length > 12) :
+    // $filter = ' AND MINUTE(stamp) % 2 = 0';
+    // $filter = " AND MINUTE(stamp) % 2 = 0"; // Get records from only even minutes
+  endif;
+    
+  // elseif ($interval_length > 36) :
+  //   $filter = " AND MINUTE(stamp) % 3 = 0"; // Get records from every third minute
+  // elseif ($interval_length > 72) :
+  //   $filter = " AND MINUTE(`stamp`) % 5 = 0"; // Get records from every fifth minute
+  // endif;
 
   $q = "SELECT stamp datetime, availableDocks Available_Docks, availableBikes Available_Bikes, (totalDocks - availableDocks - availableBikes) Null_Docks
     FROM station_status WHERE llid=CAST(%s AS UNSIGNED INTEGER)
-    AND (stamp > NOW() - INTERVAL %d HOUR) ". $filter ." ORDER BY stamp ASC;";
+    AND (`stamp` < ". $interval_end .") AND (`stamp` > ". $interval_end ." - INTERVAL %d HOUR) ". $filter ." ORDER BY `stamp` ASC";
 
-  $data = $wpdb->get_results($wpdb->prepare($q, $llid, $since, $filter));
-  $stationName = $wpdb->get_var($wpdb->prepare($j, $llid));
+  $activity_data = $wpdb->get_results($wpdb->prepare($q, $llid, $interval_length));
+
+  if (!$activity_data)
+    return json_encode(array("query"=>$q, 'end'=>$interval_end, 'len'=>$interval_length));
 
   if ($output=='csv'):
+    $stationName = get_stationname($llid);
+    return output_csv($stationName, $activity_data);
+  elseif ($activity_data) :
+    return json_encode($activity_data);
+  endif;
+}
+
+// Get trips for a station over time.
+function station_trips($llid, $output="json") {
+  global $wpdb;
+
+  list($interval_end, $interval_length) = prepare_startstop_intervals();
+
+  $query = "SELECT s.`time`, s.`count` starts, e.`count` ends FROM (
+    SELECT CONCAT(YEAR(`starttime`), '-', LPAD(MONTH(`starttime`), 2, 0), '-', DAY(`starttime`), ' ', HOUR(`starttime`), ':00') datetime,
+    count(*) count
+    FROM trips t WHERE t.`startid` = CAST(%s AS UNSIGNED INTEGER)
+    AND t.`starttime` < ". $interval_end ."
+    AND t.`starttime` > ". $interval_end ." - INTERVAL %d HOUR
+    GROUP BY MONTH(`starttime`), DAY(`starttime`), HOUR(`starttime`)
+    ORDER BY `starttime` ASC
+    ) s, (
+    SELECT CONCAT(YEAR(`endtime`), '-', LPAD(MONTH(`endtime`), 2, 0), '-', DAY(`endtime`), ' ', HOUR(`endtime`), ':00') time,
+    count(*) count
+    FROM trips t WHERE t.`endid` = CAST(%s AS UNSIGNED INTEGER)
+    AND t.`endtime` < ". $interval_end ."
+    AND t.`endtime` > ". $interval_end ." - INTERVAL %d HOUR
+    GROUP BY MONTH(`endtime`), DAY(`endtime`), HOUR(`endtime`)
+    ORDER BY `endtime` ASC
+    ) e;";
+
+  $data = $wpdb->get_results($wpdb->prepare($query, $llid, $interval_length, $llid, $interval_length));
+
+  if ($output=='csv'):
+    $stationName = get_stationname($llid);
     return output_csv($stationName, $data);
   else:
-    return json_encode(array("activity"=>$data));
+    return json_encode($data);
+  endif;
+}
+
+function prepare_startstop_intervals() {
+  global $wp_query;
+  // No variables set
+  if (!isset($wp_query->query_vars['starttime']) && !isset($wp_query->query_vars['stoptime'])) :
+    return array('NOW()', 24);
+
+  // either start or stop
+  elseif (isset($wp_query->query_vars['stoptime']) || isset($wp_query->query_vars['starttime'])) :
+    $start = new DateTime($wp_query->query_vars['starttime'], new DateTimeZone('America/New_York'));
+    $stop  = new DateTime($wp_query->query_vars['endtime'],  new DateTimeZone('America/New_York'));  
+
+    // Check if time is in the future
+    $now = new DateTime('now', new DateTimeZone('America/New_York'));
+    if ($stop->diff($now)->invert)
+      return array('NOW()', 24);
+
+    $interval_end = $stop->format("'Y-m-d H:i'");
+
+    // check if times are the same
+    if ($interval_end == $start->format("'Y-m-d H:i'"))
+      return array($interval_end, 24);
+
+    // Difference in hours. No more than 2 weeks.
+    $diff = $start->diff($stop);
+    $diff_hours = ($diff->format("%d") * 24) + $diff->format('%h') + ($diff->format('%i') / 60) ;
+    $diff_hours = min(336, $diff_hours);
+
+    return array($interval_end, $diff_hours);
   endif;
 }
 

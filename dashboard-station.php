@@ -10,7 +10,9 @@ if(isset($wp_query->query_vars['station'])) {
     $station_id = $wp_query->query_vars['station'];
     // Get the station name. Station Info is called with XHR request by JS.
     $station = get_station_meta($station_id);
-    $since = isset($wp_query->query_vars['since']) ? $wp_query->query_vars['since'] : 3;
+    $since = isset($wp_query->query_vars['since']) && $wp_query->query_vars['since'] != NULL ? $wp_query->query_vars['since'] : 0;
+    $starttime = isset($wp_query->query_vars['starttime']) && $wp_query->query_vars['starttime'] != NULL ? $wp_query->query_vars['starttime'] : NULL;
+    $endtime = isset($wp_query->query_vars['endtime']) && $wp_query->query_vars['endtime'] != NULL ? $wp_query->query_vars['endtime'] : NULL;
 }
 $post->stationName = (isset($station->stationName)) ? $station->stationName : "Couldn't find that station";
 get_header();
@@ -22,7 +24,16 @@ get_header();
 
 <form action="./" class="form-inline">
   <input type="hidden" name="station" value="<?php echo $station_id ?>">
-  Show me the last <input type="text" class="input-mini" name="since" id="since"> hours
+  <p>
+    Show me the last <input type="text" class="input-mini" name="since" id="since"> hours <button type="submit" class="btn btn-info">Go</button>
+  </p>
+</form>
+
+<form action="./" class="form-inline">
+  <input type="hidden" name="station" value="<?php echo $station_id ?>">
+  <p>
+    Show me from <input type="date" class="input-medium" name="starttime" id="starttime"> to <input type="date" class="input-medium" name="endtime" id="endtime"> <button type="submit" class="btn btn-info">Go</button>
+  </p>
 </form>
 
 <p>There are <?php echo $station->totalDocks; ?> docks here.</p>
@@ -42,7 +53,15 @@ get_header();
 <p><a href="../bikeshare-dashboard/">⃪ System Dashboard</a></p>
 
 <script>
+    function pad(n, width, z) {
+      z = z || '0';
+      n = n + '';
+      return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+
     var since = <?php echo $since; ?>,
+        starttime = '<?php echo $starttime; ?>',
+        endtime = '<?php echo $endtime; ?>',
         station_id = <?php echo $station_id; ?>;
 
     var margin = {top: 20, right: 92, bottom: 30, left: 50},
@@ -78,8 +97,42 @@ get_header();
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    d3.json("../station_activity/" + station_id + '/?since=' + since, function(error, data){
-      data = data['activity'];
+    if (since) {
+      var e = new Date();
+      endtime = e.getFullYear() +"-"+ pad(e.getMonth()+1, 2) +"-"+ pad(e.getDay()+1, 2);
+      endtime = e.getFullYear() +"-"+ pad(e.getMonth()+1, 2) +"-"+ pad(e.getDay()+1, 2);
+
+      s = new Date(e.getTime() + (since * 60000 * 60));
+    }
+
+    d3.json("../station_trips/" + station_id + '/?starttime=' + starttime + '&endtime=' + endtime, function(error, data){
+      if (!data) return;
+
+      data.forEach(function(d) {
+          d.stamp = parseDate(d.datetime);
+      });
+
+      var nodes = svg.selectAll('.trip')
+        .data(data)
+      .enter().append('g')
+        .attr('class', 'node')
+        .text(function(d){ return d.datetime; });
+
+      nodes.append("circle")
+        .attr("class", "end")
+        .attr("r", function(d) { return d.ends; })
+        .attr("transform", function(d) { return "translate(" + x(d.stamp) +",1)" });
+
+      nodes.append("circle")
+        .attr("class", "start")
+        .attr("r", function(d) { return d.starts; })
+        .attr("transform", function(d) { return "translate(" + x(d.stamp) +",0)" });
+
+    });    
+
+    d3.json("../station_activity/" + station_id + '/?starttime=' + starttime + '&endtime=' + endtime, function(error, data){
+      if (!data) return;
+
       data.forEach(function(d) {
           d.stamp = parseDate(d.datetime);
       });
@@ -102,20 +155,20 @@ get_header();
           d3.max(bikes, function(c) { return d3.max(c.values, function(v) { return v.number; }); })
       ]);
 
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
+      svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
 
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-          .append("text")
-            // .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", "-1.33em")
-            .style("text-anchor", "end")
-            .text("Docks");
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+        .append("text")
+          // .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", "-1.33em")
+          .style("text-anchor", "end")
+          .text("Docks");
    
       var bike = svg.selectAll(".bike")
         .data(bikes)
@@ -134,8 +187,8 @@ get_header();
             .attr("x", 1)
             .attr("dy", ".35em")
             .text(function(d) { return d.name; });
-      });
-
+    });
+    
   //
   // Activity Pattern
   //
