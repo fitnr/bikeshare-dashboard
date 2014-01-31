@@ -76,6 +76,12 @@
           stroke: steelblue;
           stroke-width: 3px;
         }
+        .circle-end {
+          fill: rgba(240, 25, 25, 0.33);
+        }
+        .circle-start {
+          fill: rgba(25, 25, 240, 0.33);
+        }
     </style>
 
   <?php wp_head(); ?>

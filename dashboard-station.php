@@ -66,15 +66,18 @@ get_header();
 
     var margin = {top: 20, right: 92, bottom: 30, left: 50},
         width = 1096 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        height = 600 - margin.top - margin.bottom;
 
-    var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+    var parseDatetime = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+    var parseDate = d3.time.format("%Y-%m-%d").parse;
 
     var x = d3.time.scale()
+        .domain([parseDate(starttime), parseDate(endtime)])
         .range([0, width]);
 
     var y = d3.scale.linear()
-        .range([height, 0]);
+        .range([height, 100]);
 
     var color = d3.scale.category10();
 
@@ -109,32 +112,36 @@ get_header();
       if (!data) return;
 
       data.forEach(function(d) {
-          d.stamp = parseDate(d.datetime);
+          d.stamp = parseDatetime(d.datetime);
       });
 
-      var nodes = svg.selectAll('.trip')
+      var nodes = svg.selectAll('.trips')
+        .append('g')
+        .attr("class", "trips")
         .data(data)
       .enter().append('g')
-        .attr('class', 'node')
-        .text(function(d){ return d.datetime; });
+        .attr('class', 'node');
+
+      // nodes.append("text")
+        // .text(function(d){ return d.datetime; })
+        // .attr("transform", function(d) { return "translate(" + x(d.stamp) +",10)" });
 
       nodes.append("circle")
-        .attr("class", "end")
+        .attr("class", "circle-end")
         .attr("r", function(d) { return d.ends; })
-        .attr("transform", function(d) { return "translate(" + x(d.stamp) +",1)" });
+        .attr("transform", function(d) { return "translate(" + x(d.stamp) +",25)" });
 
       nodes.append("circle")
-        .attr("class", "start")
+        .attr("class", "circle-start")
         .attr("r", function(d) { return d.starts; })
-        .attr("transform", function(d) { return "translate(" + x(d.stamp) +",0)" });
-
+        .attr("transform", function(d) { return "translate(" + x(d.stamp) +",100)" });
     });    
 
     d3.json("../station_activity/" + station_id + '/?starttime=' + starttime + '&endtime=' + endtime, function(error, data){
       if (!data) return;
 
       data.forEach(function(d) {
-          d.stamp = parseDate(d.datetime);
+          d.stamp = parseDatetime(d.datetime);
       });
 
       color.domain(d3.keys(data[0]).filter(function(key) { return key !== "stamp" && key !== "datetime"; }));

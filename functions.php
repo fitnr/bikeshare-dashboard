@@ -194,25 +194,30 @@ function station_trips($llid, $output="json") {
 
   list($interval_end, $interval_length) = prepare_startstop_intervals();
 
-  $query = "SELECT s.`time`, s.`count` starts, e.`count` ends FROM (
-    SELECT CONCAT(YEAR(`starttime`), '-', LPAD(MONTH(`starttime`), 2, 0), '-', DAY(`starttime`), ' ', HOUR(`starttime`), ':00') datetime,
+  $query = "SELECT s.datetime, s.count starts, e.count ends FROM (
+    SELECT CONCAT(YEAR(`starttime`), '-', LPAD(MONTH(`starttime`), 2, 0), '-', LPAD(DAY(`starttime`), 2, 0), ' ', LPAD(HOUR(`starttime`), 2, 0), ':00:00') datetime,
     count(*) count
     FROM trips t WHERE t.`startid` = CAST(%s AS UNSIGNED INTEGER)
     AND t.`starttime` < ". $interval_end ."
     AND t.`starttime` > ". $interval_end ." - INTERVAL %d HOUR
+    AND t.`usertype` != ''
     GROUP BY MONTH(`starttime`), DAY(`starttime`), HOUR(`starttime`)
     ORDER BY `starttime` ASC
     ) s, (
-    SELECT CONCAT(YEAR(`endtime`), '-', LPAD(MONTH(`endtime`), 2, 0), '-', DAY(`endtime`), ' ', HOUR(`endtime`), ':00') time,
+    SELECT CONCAT(YEAR(`endtime`), '-', LPAD(MONTH(`endtime`), 2, 0), '-', LPAD(DAY(`endtime`), 2, 0), ' ', LPAD(HOUR(`endtime`), 2, 0), ':00:00') datetime,
     count(*) count
     FROM trips t WHERE t.`endid` = CAST(%s AS UNSIGNED INTEGER)
     AND t.`endtime` < ". $interval_end ."
     AND t.`endtime` > ". $interval_end ." - INTERVAL %d HOUR
+    AND t.`usertype` != ''
     GROUP BY MONTH(`endtime`), DAY(`endtime`), HOUR(`endtime`)
     ORDER BY `endtime` ASC
-    ) e;";
+    ) e WHERE e.datetime=s.datetime;";
 
   $data = $wpdb->get_results($wpdb->prepare($query, $llid, $interval_length, $llid, $interval_length));
+
+  if (!$data)
+    return json_encode(array("query"=>$query, 'end'=>$interval_end, 'llid'=>$llid, 'len'=>$interval_length));
 
   if ($output=='csv'):
     $stationName = get_stationname($llid);
