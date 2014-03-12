@@ -147,6 +147,9 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
 
   // Close the connection
   $pdo = NULL;
+
+  // remove the file
+  unlink($f);
 }
 
 function open_file($f) {
