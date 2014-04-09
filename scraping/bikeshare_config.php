@@ -12,4 +12,3 @@ $DATABASE = "";
 //$PWORD = "";
 //$DATABASE = "";
 ?>
-
