@@ -95,16 +95,51 @@ $param_keys = array(
   )
   );
 
-function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_York") {
+/**
+ * Grabs JSON url and returns parsed data
+ *
+ * @param string $json_url The URI of the station json feed 
+*/
+function scrape_json($json_url) {
+
+  $handle = curl_init($json_url);
+
+  curl_setopt($handle, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($handle, CURLOPT_USERAGENT, 'FITNR bikeshare scraper');
+
+  $output = curl_exec($handle);
+  curl_close($handle);
+
+  if ($output == False):
+    echo 'curl failed'."\n";
+    return;
+  endif;
+
+  try {
+    return json_decode($output);
+
+  } catch (Exception $e) {
+    echo $e->getMessage() .' '. $f . " \n";
+    return;
+  }
+
+}
+
+/**
+ * Insert the data into mySQL
+*/
+function json_to_mysql($data, $host, $user, $pword, $database, $tz="America/New_York") {
 
   date_default_timezone_set($tz);
 
   try {
-    $data = open_file($f);
     list($stats, $timestamp) = parse_data($data);
+
   } catch (Exception $e) {
+
     echo $e->getMessage() .' '. $f . " \n";
     return;
+
   }
 
   // Connect to the DB.
@@ -147,20 +182,8 @@ function json_to_mysql($f, $host, $user, $pword, $database, $tz="America/New_Yor
 
   // Close the connection
   $pdo = NULL;
-
-  // remove the file
-  unlink($f);
 }
 
-function open_file($f) {
-  $fs = filesize($f);
-
-  if ($fs == 0)
-    throw new Exception("File empty or missing: " . $f, 1);
-
-  $data = fread(fopen($f, 'r'), $fs);
-  return (array) json_decode($data);
-}
 
 function parse_data($data) {
   // Organize the data, set the date

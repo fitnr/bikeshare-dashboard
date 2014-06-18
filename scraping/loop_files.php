@@ -1,6 +1,6 @@
 <?php
-require 'json_to_mysql.php';
-require 'bikeshare_config.php';
+require 'function.php';
+require 'config.php';
 
 foreach (scandir($DIR) as $path): // Loop saved files
 

@@ -1,1 +1,1 @@
-0-59 * * * * STAMP=$(date +"\%Y-\%m-\%d-\%H\%M");curl -s http://citibikenyc.com/stations/json/ > /Users/DOT/Documents/data/stations-$STAMP.json; php /Users/DOT/stratcom/bikeshare/scraping/json_to_mysql.php /Users/DOT/Documents/data/stations-$STAMP.json;
+0-59 * * * * STAMP=$(date +"\%Y-\%m-\%d-\%H\%M");curl -s http://www.citibikenyc.com/stations/json/ > /Users/DOT/Documents/data/stations-$STAMP.json; php /Users/DOT/stratcom/bikeshare/scraping/scrape.php /Users/DOT/Documents/data/stations-$STAMP.json;
