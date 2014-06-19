@@ -1,15 +1,13 @@
 <?php
 /**
  * Template Name: Bikeshare Dashboard
- * @package WordPress
- * @subpackage bikeshare-dashboard
+ * @package bikeshare-dashboard
 */
-get_header();
 
-global $wpdb;
+include $cms->get_header();
 
-$kwargs = station_overview();
-$station_data = $wpdb->get_results(sprintf($kwargs['q'], $kwargs['since']));
+$args = $cms->api->station_overview();
+$station_data = $cms->api->abstract_bikeshare_dashboard($args);
 usort($station_data, 'diffockcmp');
 $since = (int) $kwargs['since'];
 
@@ -27,7 +25,6 @@ $planned_stations = array_filter($station_data, 'status2');
 $count_no_active = 0;
 foreach ($active_stations as $s)
   $count_no_active += ($s->diffDocks <= 0) ? 1 : 0;
-
 ?>
 
 <h1>Activity overview for last <?php echo pluralize($since); ?></h1>
@@ -259,4 +256,4 @@ foreach ($active_stations as $s)
       });
 </script>
 
-<?php get_footer(); ?>
+<?php include $cms->get_footer(); ?>

@@ -1,10 +1,9 @@
 <?php
 /**
  * Template Name: Bikeshare Dashboard Map
- * @package WordPress
- * @subpackage bikeshare-dashboard
+ * @package bikeshare-dashboard
 */
-get_header();
+include $cms->get_header();
 ?>
 <style>
   /* gmap rules */
@@ -45,8 +44,6 @@ get_header();
   p.infowindow {
     line-height: 1.1em;
   }
-
-
 </style>
 
 <div class="row map-container">
@@ -75,10 +72,10 @@ get_header();
 </div>
 <!-- Google Map's API -->
 <script src="http://maps.google.com/maps/api/js?v=3.5&amp;sensor=false"></script>
-<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/map-dashboard.js"></script>
+<script src="<?php $cms->absolute_url('/assets/js/map-dashboard.js', 0) ?>"></script>
 <script type="text/javascript" id="globals">
-	var endpoint = "<?php echo home_url(); ?>/get_station_locations";
+	var endpoint = "<?php $cms->absolute_url('/api/get_station_locations/', 0)?>";
 	google.maps.event.addListener(window, 'domready', bikemapinit(endpoint));
 </script>
 
-<?php get_footer(); ?>
+<?php include $cms->get_footer(); ?>
