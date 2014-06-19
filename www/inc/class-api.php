@@ -19,14 +19,18 @@ class api {
 
     if (preg_match(',/system_activity/,', $_SERVER['REQUEST_URI'])) {
       header("HTTP/1.0 200 OK");
-      $args = get_overview_data();
-      echo abstract_bikeshare_dashboard($args);
+      $args = $this->get_overview_data();
+      echo $this->abstract_bikeshare_dashboard($args);
       exit;
       
     } elseif (preg_match(',/system_activity_csv/,', $_SERVER['REQUEST_URI'])) {
-      $args = get_overview_data();
+      $args = $this->get_overview_data();
       $args['output'] = 'csv';
-      $output = abstract_bikeshare_dashboard($args);
+
+      $args['fileName'] = 'station-activity-overview';
+      // $args['fileName'] = date('%o-%m-%d %G:%i') . '-station-activity-overview';
+
+      $output = $this->abstract_bikeshare_dashboard($args);
       header("HTTP/1.0 200 OK");
       header('Content-type: application/CSV');
       header('Content-Disposition: attachment; filename="'. $output['filename'] .'.csv"');
@@ -79,7 +83,7 @@ class api {
       $this->db->print_error();
 
     if ($kwargs['output'] == 'csv' || $output == 'csv'):
-      return output_csv($kwargs['fileName'], $data);
+      return $this->output_csv($kwargs['fileName'], $data);
 
     elseif ($kwargs['output'] == 'json' || $output == 'json'):
       return json_encode($data);
@@ -168,8 +172,8 @@ class api {
       return json_encode(array("query"=>$q, 'end'=>$interval_end, 'len'=>$interval_length));
 
     if ($output=='csv'):
-      $stationName = get_stationname($llid);
-      return output_csv($stationName, $activity_data);
+      $stationName = $this->get_stationname($llid);
+      return $this->output_csv($stationName, $activity_data);
     elseif ($activity_data) :
       return json_encode($activity_data);
     endif;
@@ -200,14 +204,16 @@ class api {
       ORDER BY `endtime` ASC
       ) e WHERE e.datetime=s.datetime;";
 
-    $data = $this->db->get_results($this->db->prepare($query, $llid, $interval_length, $llid, $interval_length));
+    $query = $this->db->prepare($query, $llid, $interval_length, $llid, $interval_length);
+    $query = sprintf($query, $llid, $interval_length, $llid, $interval_length);
+    $data = $this->db->get_results($query);
 
     if (!$data)
       return json_encode(array("query"=>$query, 'end'=>$interval_end, 'llid'=>$llid, 'len'=>$interval_length));
 
     if ($output=='csv'):
       $stationName = get_stationname($llid);
-      return output_csv($stationName, $data);
+      return $this->output_csv($stationName, $data);
     else:
       return json_encode($data);
     endif;

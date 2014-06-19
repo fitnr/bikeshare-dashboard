@@ -9,7 +9,9 @@ include $cms->get_header();
 $args = $cms->api->station_overview();
 $station_data = $cms->api->abstract_bikeshare_dashboard($args);
 usort($station_data, 'diffockcmp');
-$since = (int) $kwargs['since'];
+$since = (int) $cms->api->get_query_var('since', 1);
+
+$system_activity_url = $cms->absolute_url("/api/system_activity/?since=". $since);
 
 // Get status of stations
 $station_status = array('1'=>0, '2'=>0, '3'=>0);
@@ -101,7 +103,9 @@ foreach ($active_stations as $s)
 <?php endif; ?>
 
 <script>
-    var since = <?php echo $kwargs['since'] ;?>;
+    var since = <?php echo $since ?>,
+        SYSTEM_ACTIVITY = '<?php echo $system_activity_url ?>';
+
     var margin = {top: 13, right: 30, bottom: 30, left: 42},
         width = 540 - margin.left - margin.right,
         height = 300 - margin.top - margin.bottom;
@@ -144,7 +148,7 @@ foreach ($active_stations as $s)
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    d3.json("<?php bloginfo('url'); ?>/system_activity/?since=" + since, function(error, data){
+    d3.json(SYSTEM_ACTIVITY, function(error, data){
 
       data.forEach(function(d) {
           d.stamp = parseDate(d.datetime);
