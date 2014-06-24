@@ -1,5 +1,5 @@
 <?php
-include 'config.php';
+include '../config.php';
 include 'class-db.php';
 /*
  * Add api functions for wordpress to respond to.

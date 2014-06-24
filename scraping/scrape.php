@@ -5,7 +5,7 @@
   Then processes into mySQL.
 */
 include 'functions.php';
-include 'config.php';
+include '../config.php';
 
 // Use CLI argument if it exists
 if (array_key_exists(1, $argv)):
@@ -15,6 +15,6 @@ else:
 endif;
 
 $data = scrape_json($feed);
-json_to_mysql($data, $HOST, $USER, $PWORD, $DATABASE);
+json_to_mysql($data, DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
 ?>

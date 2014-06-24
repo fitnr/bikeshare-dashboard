@@ -1,5 +1,5 @@
 <?php
-include 'inc/config.php';
+include '../config.php';
 include 'inc/functions.php';
 
 $cms = new cms('dashboard-bikeshare');

@@ -6,6 +6,7 @@
  *
  * @package bikeshare-dashboard
  */
+define('JSONFEED', 'http://www.citibikenyc.com/stations/json/');
 
 // base URL of the thing we are at!
 // No http or https needed
@@ -14,6 +15,7 @@ define('SITE_URL', 'localhost');
 define('BASE_DIR', 'bikeshare-dashboard/www');
 
 // ** MySQL settings - You can get this info from your web host ** //
+
 define('DB_NAME', '');
 
 /** MySQL database username */
@@ -34,4 +36,7 @@ define('DB_COLLATE', '');
 define('TIMEZONE', 'America/New_York');
 
 if ( !defined('ABSPATH') )
-  define('ABSPATH', dirname(dirname(__FILE__) . '/'));
+  define('ABSPATH', dirname(__FILE__) . '/www' );
+
+
+?>
