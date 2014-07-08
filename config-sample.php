@@ -10,7 +10,7 @@ define('JSONFEED', 'http://www.citibikenyc.com/stations/json/');
 
 // base URL of the thing we are at!
 // No http or https needed
-define('SITE_URL', 'localhost');
+define('SITE_URL', 'foo.com');
 
 define('BASE_DIR', 'bikeshare-dashboard/www');
 
