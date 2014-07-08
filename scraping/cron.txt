@@ -1,1 +1,2 @@
-0-59 * * * * STAMP=$(date +"\%Y-\%m-\%d-\%H\%M");curl -s http://www.citibikenyc.com/stations/json/ > ~/data/stations-$STAMP.json; php ~/bikeshare-dashboard/scraping/scrape.php ~/data/stations-$STAMP.json;
+# Example cron file. Replace the path with the one on your machine
+0-59 * * * * php ~/bikeshare-dashboard/scraping/scrape.php;

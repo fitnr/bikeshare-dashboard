@@ -96,11 +96,34 @@ $param_keys = array(
   );
 
 /**
+ * Run curl on a URL and return the result 
+*/
+function curl_file($url) {
+  $curl = curl_init();
+  curl_setopt($curl, CURLOPT_URL, $url);
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($curl, CURLOPT_HEADER, 0);
+  curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+  $data = curl_exec($curl);
+  curl_close($curl);
+  return $data;
+}
+
+function savefile($data) {
+  $filename = './data/bikeshare-data-' . date("ymd-Hi");
+  if ($fh = fopen($filename, "w")) :
+    fwrite($fh, $data);
+    fclose($fh);
+    return true;
+  endif;
+}
+
+/**
  * Grabs JSON url and returns parsed data
  *
  * @param string $json_url The URI of the station json feed 
 */
-function scrape_json($json_url) {
+function parse_json($json_url) {
 
   $handle = curl_init($json_url);
 
@@ -122,7 +145,6 @@ function scrape_json($json_url) {
     echo $e->getMessage() .' '. $f . " \n";
     return;
   }
-
 }
 
 /**
